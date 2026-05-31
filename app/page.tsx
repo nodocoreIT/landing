@@ -1,56 +1,12 @@
-import Image from "next/image";
+import Link from "next/link";
 import Navbar from "@/components/ui/Navbar";
 import Footer from "@/components/ui/Footer";
 import ContactForm from "@/components/ui/ContactForm";
 import RevealOnScroll from "@/components/ui/RevealOnScroll";
 import EcosystemDiagram from "@/components/EcosystemDiagram";
+import { NODES, type NodeDef } from "@/lib/nodes";
 
 // ─── Data ───────────────────────────────────────────────────────────────────
-
-const UNITS = [
-  {
-    index: "01",
-    name: "Inmo",
-    description:
-      "Gestión inmobiliaria de nueva generación, con respaldo de martilleros públicos.",
-  },
-  {
-    index: "02",
-    name: "Obra",
-    description:
-      "Administración de proyectos constructivos: avances, gastos, registros y pagos.",
-  },
-  {
-    index: "03",
-    name: "Capital",
-    description:
-      "División financiera enfocada en la formación de grupos inversores.",
-  },
-  {
-    index: "04",
-    name: "IT",
-    description:
-      "El motor tecnológico: software a medida e infraestructura corporativa.",
-  },
-  {
-    index: "05",
-    name: "Legal",
-    description:
-      "Asesoramiento jurídico integral, transversal a todas las áreas.",
-  },
-  {
-    index: "06",
-    name: "Seguros",
-    description:
-      "Protección estratégica para blindar los activos del ecosistema.",
-  },
-  {
-    index: "07",
-    name: "Agro",
-    description:
-      "Soluciones integrales para el sector productivo y los negocios rurales.",
-  },
-];
 
 const BENEFIT_CARDS = [
   {
@@ -146,9 +102,8 @@ function HeroSection() {
             className="font-display font-extrabold text-white max-w-[780px] mx-auto"
             style={{ fontSize: "clamp(40px,6vw,76px)", lineHeight: 1.05 }}
           >
-            El{" "}
-            <span className="text-brand">núcleo</span>{" "}
-            que conecta todo su negocio
+            El <span className="text-brand">núcleo</span> que conecta todo su
+            negocio
           </h1>
         </RevealOnScroll>
 
@@ -171,6 +126,7 @@ function HeroSection() {
         <RevealOnScroll delay={240} className="w-full">
           <EcosystemDiagram
             dark
+            interactive
             className="w-full max-w-[560px] aspect-square mx-auto mt-[26px]"
           />
         </RevealOnScroll>
@@ -242,9 +198,8 @@ function FilosofiaSection() {
             >
               No somos un conjunto de empresas. Somos un{" "}
               <span className="text-brand">
-                ecosistema de gestión inteligente
+                ecosistema de gestión inteligente.
               </span>
-              .
             </blockquote>
           </div>
         </RevealOnScroll>
@@ -274,7 +229,6 @@ function FilosofiaSection() {
           </div>
         </RevealOnScroll>
       </div>
-
     </SectionWrapper>
   );
 }
@@ -300,9 +254,9 @@ function UnidadesSection() {
 
       {/* Units list */}
       <div className="flex flex-col">
-        {UNITS.map((unit, i) => (
-          <RevealOnScroll key={unit.index} delay={i * 40}>
-            <UnidadRow unit={unit} />
+        {NODES.map((node, i) => (
+          <RevealOnScroll key={node.slug} delay={i * 40}>
+            <UnidadRow node={node} index={String(i + 1).padStart(2, "0")} />
           </RevealOnScroll>
         ))}
       </div>
@@ -310,14 +264,13 @@ function UnidadesSection() {
   );
 }
 
-function UnidadRow({
-  unit,
-}: {
-  unit: (typeof UNITS)[number];
-}) {
+function UnidadRow({ node, index }: { node: NodeDef; index: string }) {
+  const { Icon } = node;
   return (
-    <div
-      className="unidad-row group grid items-center gap-6 py-5 px-2 cursor-default transition-all duration-200 rounded-sm hover:pl-4"
+    <Link
+      href={`/nodo-${node.slug}`}
+      prefetch
+      className="unidad-row group grid items-center gap-6 py-5 px-2 cursor-pointer transition-all duration-200 rounded-sm hover:pl-4"
       style={{
         gridTemplateColumns: "70px 1fr 1.4fr auto",
         borderBottom: "1px solid rgba(255,255,255,.1)",
@@ -325,17 +278,28 @@ function UnidadRow({
     >
       {/* Index */}
       <span className="font-display font-bold text-brand text-[15px]">
-        {unit.index}
+        {index}
       </span>
 
       {/* Tag */}
-      <span className="font-display font-bold text-white text-[20px]">
-        nodo <span className="text-brand font-normal mx-[.3em]">|</span> {unit.name}
+      <span className="flex items-center gap-3 font-display font-bold text-white text-[20px]">
+        <Icon
+          className="w-5 h-5 text-brand shrink-0"
+          strokeWidth={1.75}
+          aria-hidden="true"
+        />
+        <span>
+          nodo <span className="text-brand font-normal mx-[.3em]">|</span>{" "}
+          {node.code}
+        </span>
       </span>
 
       {/* Description */}
-      <span className="unidad-desc text-[14.5px]" style={{ color: "rgba(234,240,247,.65)" }}>
-        {unit.description}
+      <span
+        className="unidad-desc text-[14.5px]"
+        style={{ color: "rgba(234,240,247,.65)" }}
+      >
+        {node.description}
       </span>
 
       {/* Arrow */}
@@ -359,7 +323,7 @@ function UnidadRow({
           />
         </svg>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -397,11 +361,7 @@ function BeneficiosSection() {
   );
 }
 
-function BenefitCard({
-  card,
-}: {
-  card: (typeof BENEFIT_CARDS)[number];
-}) {
+function BenefitCard({ card }: { card: (typeof BENEFIT_CARDS)[number] }) {
   return (
     <div
       className="rounded-lg p-[30px] bg-white transition-all duration-200 hover:-translate-y-1 hover:shadow-md"

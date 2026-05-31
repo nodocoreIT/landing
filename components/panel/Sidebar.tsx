@@ -18,11 +18,13 @@ type SidebarProps = {
   userColor: string;
   taskCount: number;
   clientCount: number;
+  teamCount: number;
 };
 
 const PLATFORM_ITEMS: NavItem[] = [
   { label: "Tareas", href: "/panel/tareas" },
   { label: "Clientes", href: "/panel/clientes" },
+  { label: "Equipo", href: "/panel/equipo" },
 ];
 
 const ECOSYSTEM_ITEMS: NavItem[] = [
@@ -38,6 +40,7 @@ export default function Sidebar({
   userColor,
   taskCount,
   clientCount,
+  teamCount,
 }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -45,6 +48,7 @@ export default function Sidebar({
   const counts: Record<string, number> = {
     "/panel/tareas": taskCount,
     "/panel/clientes": clientCount,
+    "/panel/equipo": teamCount,
   };
 
   async function handleSignOut() {

@@ -1,54 +1,74 @@
 "use client";
 
-const DEFAULT_UNITS = [
-  { code: "Inmo" },
-  { code: "Obra" },
-  { code: "Capital" },
-  { code: "IT" },
-  { code: "Legal" },
-  { code: "Seguros" },
-  { code: "Agro" },
-  { code: "Propiedad" },
-];
+import Link from "next/link";
+import { NODES, type NodeDef } from "@/lib/nodes";
 
 interface EcosystemDiagramProps {
   dark?: boolean;
+  /** Optional subset/ordering by code. Defaults to the full catalog. */
   units?: { code: string }[];
+  /** When true, satellites become links with hover detail and navigation. */
+  interactive?: boolean;
   className?: string;
 }
 
+// ─── Geometry (SVG view-box space) ──────────────────────────────────────────
+const W = 520;
+const H = 520;
+const CX = W / 2;
+const CY = H / 2;
+const R = 190; // orbit radius
+const CORE_R = 46;
+const HALO_R = CORE_R + 14;
+// Satellite diameter as a fraction of the container width → drives `cqw` sizing
+// so the HTML overlay scales exactly like the SVG backdrop.
+const SAT_DIAMETER_CQW = 15.5;
+
 export default function EcosystemDiagram({
   dark = false,
-  units = DEFAULT_UNITS,
+  units,
+  interactive = false,
   className = "",
 }: EcosystemDiagramProps) {
-  const W = 520;
-  const H = 520;
-  const cx = W / 2;
-  const cy = H / 2;
-  const R = 190;
-  const coreR = 46;
-  const satR = 31;
-  const haloR = coreR + 14;
-  const n = units.length;
+  const resolved: NodeDef[] = units
+    ? units
+        .map((u) => NODES.find((n) => n.code === u.code))
+        .filter((n): n is NodeDef => Boolean(n))
+    : NODES;
+
+  const n = resolved.length;
 
   const stroke = dark ? "rgba(222,231,241,.34)" : "rgba(100,120,144,.55)";
-  const satFill = dark ? "#233650" : "#FFFFFF";
-  const satStroke = dark ? "rgba(222,231,241,.55)" : "#C6D3E2";
-  const satText = dark ? "#DEE7F1" : "#1B2A41";
   const shadowOpacity = dark ? 0.45 : 0.14;
 
-  const points = Array.from({ length: n }, (_, i) => {
+  const points = resolved.map((node, i) => {
     const angle = ((-90 + (i * 360) / n) * Math.PI) / 180;
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
     return {
-      x: cx + R * Math.cos(angle),
-      y: cy + R * Math.sin(angle),
+      node,
+      cos,
+      sin,
+      x: CX + R * cos,
+      y: CY + R * sin,
+      // Percentage position for the HTML overlay.
+      left: `${((CX + R * cos) / W) * 100}%`,
+      top: `${((CY + R * sin) / H) * 100}%`,
     };
   });
 
   return (
-    <div className={className}>
-      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" style={{ overflow: "visible" }}>
+    <div
+      className={`relative ${className}`}
+      style={{ containerType: "inline-size" }}
+    >
+      {/* Static backdrop: orbit ring, connectors and core */}
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        className="absolute inset-0 h-full w-full"
+        style={{ overflow: "visible" }}
+        aria-hidden="true"
+      >
         <defs>
           <filter id="nodoShadow" x="-40%" y="-40%" width="180%" height="180%">
             <feDropShadow
@@ -61,10 +81,9 @@ export default function EcosystemDiagram({
           </filter>
         </defs>
 
-        {/* Orbit ring */}
         <circle
-          cx={cx}
-          cy={cy}
+          cx={CX}
+          cy={CY}
           r={R}
           fill="none"
           stroke={stroke}
@@ -72,12 +91,11 @@ export default function EcosystemDiagram({
           strokeWidth="1.5"
         />
 
-        {/* Lines from center to satellites */}
         {points.map((p, i) => (
           <line
             key={`line-${i}`}
-            x1={cx}
-            y1={cy}
+            x1={CX}
+            y1={CY}
             x2={p.x}
             y2={p.y}
             stroke={stroke}
@@ -85,42 +103,17 @@ export default function EcosystemDiagram({
           />
         ))}
 
-        {/* Satellites */}
-        {points.map((p, i) => (
-          <g key={`sat-${i}`}>
-            <circle
-              cx={p.x}
-              cy={p.y}
-              r={satR}
-              fill={satFill}
-              stroke={satStroke}
-              strokeWidth="1.5"
-              filter="url(#nodoShadow)"
-            />
-            <text
-              x={p.x}
-              y={p.y + 4}
-              textAnchor="middle"
-              fill={satText}
-              fontFamily="var(--font-sans)"
-              fontSize="12.5"
-              fontWeight="600"
-            >
-              {units[i].code}
-            </text>
-          </g>
-        ))}
-
-        {/* Core halo */}
-        <circle cx={cx} cy={cy} r={haloR} fill="rgba(218,90,14,.12)" />
-
-        {/* Core circle */}
-        <circle cx={cx} cy={cy} r={coreR} fill="#DA5A0E" />
-
-        {/* Core text */}
+        <circle
+          className="ecosystem-core-pulse"
+          cx={CX}
+          cy={CY}
+          r={HALO_R}
+          fill="rgba(218,90,14,.12)"
+        />
+        <circle cx={CX} cy={CY} r={CORE_R} fill="#DA5A0E" />
         <text
-          x={cx}
-          y={cy + 6}
+          x={CX}
+          y={CY + 6}
           textAnchor="middle"
           fill="#fff"
           fontFamily="var(--font-display)"
@@ -130,6 +123,119 @@ export default function EcosystemDiagram({
           Core
         </text>
       </svg>
+
+      {/* Interactive satellite overlay */}
+      {points.map((p) => (
+        <Satellite
+          key={p.node.code}
+          point={p}
+          dark={dark}
+          interactive={interactive}
+        />
+      ))}
     </div>
+  );
+}
+
+// ─── Satellite ─────────────────────────────────────────────────────────────
+
+interface SatellitePoint {
+  node: NodeDef;
+  cos: number;
+  sin: number;
+  left: string;
+  top: string;
+}
+
+function Satellite({
+  point,
+  dark,
+  interactive,
+}: {
+  point: SatellitePoint;
+  dark: boolean;
+  interactive: boolean;
+}) {
+  const { node, cos, sin, left, top } = point;
+  const { Icon } = node;
+
+  const circleClasses = [
+    "flex flex-col items-center justify-center gap-[1.2cqw] rounded-full text-center",
+    "border transition-transform duration-200 ease-out",
+    dark
+      ? "bg-navy-700 border-[rgba(222,231,241,.55)] text-[#DEE7F1]"
+      : "bg-white border-[#C6D3E2] text-navy",
+    interactive ? "group-hover:scale-[1.18] group-focus-visible:scale-[1.18]" : "",
+  ].join(" ");
+
+  const circle = (
+    <span
+      className={circleClasses}
+      style={{
+        width: `${SAT_DIAMETER_CQW}cqw`,
+        height: `${SAT_DIAMETER_CQW}cqw`,
+        boxShadow: dark
+          ? "0 4px 12px rgba(0,0,0,.35)"
+          : "0 4px 12px rgba(27,42,65,.14)",
+      }}
+    >
+      <Icon
+        aria-hidden="true"
+        style={{ width: "4.4cqw", height: "4.4cqw" }}
+        strokeWidth={1.75}
+      />
+      <span className="font-semibold leading-none" style={{ fontSize: "2.5cqw" }}>
+        {node.code}
+      </span>
+    </span>
+  );
+
+  // Decorative mode (e.g. login): plain node, no link, no hover detail.
+  if (!interactive) {
+    return (
+      <span
+        className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
+        style={{ left, top }}
+      >
+        {circle}
+      </span>
+    );
+  }
+
+  // Tooltip sits beside the node, pushed outward (away from the diagram center)
+  // into open space so it never overlaps the node or its neighbours.
+  // Right-half nodes get it on their right, left-half nodes on their left.
+  // It's also nudged vertically along the node's radial direction so the
+  // top/bottom nodes clear their diagonal neighbours.
+  const tipGap = SAT_DIAMETER_CQW / 2 + 2.5; // cqw from node center to tooltip edge
+  const tipY = `calc(-50% + ${(sin * 9).toFixed(2)}cqw)`;
+  const tipTransform =
+    cos >= 0
+      ? `translate(${tipGap.toFixed(2)}cqw, ${tipY})`
+      : `translate(calc(-100% - ${tipGap.toFixed(2)}cqw), ${tipY})`;
+
+  return (
+    <Link
+      href={`/nodo-${node.slug}`}
+      aria-label={`${node.label}: ${node.description}`}
+      prefetch
+      className="group absolute z-10 -translate-x-1/2 -translate-y-1/2 outline-none"
+      style={{ left, top }}
+    >
+      {circle}
+
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute left-1/2 top-1/2 z-20 w-[170px] rounded-lg border border-white/10 bg-navy-900/95 px-3 py-2 text-left opacity-0 shadow-xl backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100"
+        style={{ transform: tipTransform }}
+      >
+        <span className="block text-[12px] font-bold text-brand-300">
+          {node.label}
+        </span>
+        <span className="mt-0.5 block text-[11.5px] leading-snug text-white/80">
+          {node.description}
+        </span>
+      </span>
+    </Link>
   );
 }

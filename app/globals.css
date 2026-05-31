@@ -134,3 +134,38 @@ h1, h2, h3, h4 {
     grid-template-columns: repeat(2, 1fr) !important;
   }
 }
+
+/* Ecosystem core "heartbeat" — animates the orange halo behind the Core node */
+.ecosystem-core-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ecosystemCorePulse 2.6s ease-in-out infinite;
+}
+@keyframes ecosystemCorePulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.12;
+  }
+  12% {
+    transform: scale(1.16);
+    opacity: 0.26;
+  }
+  24% {
+    transform: scale(1.02);
+    opacity: 0.16;
+  }
+  36% {
+    transform: scale(1.1);
+    opacity: 0.2;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 0.12;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ecosystem-core-pulse {
+    animation: none;
+  }
+}

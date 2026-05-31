@@ -44,9 +44,10 @@ export default async function PanelLayout({
     redirect("/login");
   }
 
-  const [{ count: taskCount }, { count: clientCount }] = await Promise.all([
+  const [{ count: taskCount }, { count: clientCount }, { count: teamCount }] = await Promise.all([
     supabase.from("tasks").select("*", { count: "exact", head: true }),
     supabase.from("clients").select("*", { count: "exact", head: true }),
+    supabase.from("profiles").select("*", { count: "exact", head: true }),
   ]);
 
   const email = user.email ?? "";
@@ -71,6 +72,7 @@ export default async function PanelLayout({
         userColor={color}
         taskCount={taskCount ?? 0}
         clientCount={clientCount ?? 0}
+        teamCount={teamCount ?? 0}
       />
       <main
         style={{

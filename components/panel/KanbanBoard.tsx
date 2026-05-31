@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   DndContext,
   DragEndEvent,
@@ -74,6 +74,348 @@ const MONTH_NAMES = [
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr);
   return `${d.getDate()} ${MONTH_NAMES[d.getMonth()]}`;
+}
+
+// ─── TaskEditModal ────────────────────────────────────────────────────────────
+
+function TaskEditModal({
+  task,
+  profiles,
+  units,
+  onSave,
+  onDelete,
+  onClose,
+}: {
+  task: Task;
+  profiles: Profile[];
+  units: string[];
+  onSave: (updated: Task) => void;
+  onDelete: (id: string) => void;
+  onClose: () => void;
+}) {
+  const [title, setTitle] = useState(task.title);
+  const [description, setDescription] = useState(task.description ?? "");
+  const [unitCode, setUnitCode] = useState(task.unit_code);
+  const [priority, setPriority] = useState<Task["priority"]>(task.priority);
+  const [dueDate, setDueDate] = useState(task.due_date ?? "");
+  const [assignee, setAssignee] = useState(task.assignee ?? "");
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const inputStyle: React.CSSProperties = {
+    width: "100%",
+    border: "1px solid var(--color-mist)",
+    borderRadius: 6,
+    padding: "8px 10px",
+    fontSize: 13.5,
+    fontFamily: "var(--font-sans)",
+    outline: "none",
+    boxSizing: "border-box",
+    color: "var(--color-ink)",
+    background: "white",
+  };
+
+  const labelStyle: React.CSSProperties = {
+    display: "block",
+    fontSize: 12,
+    fontWeight: 600,
+    color: "var(--color-slate2)",
+    marginBottom: 5,
+    fontFamily: "var(--font-sans)",
+    textTransform: "uppercase",
+    letterSpacing: "0.04em",
+  };
+
+  async function handleSave() {
+    if (!title.trim()) return;
+    setSaving(true);
+    const updated: Task = {
+      ...task,
+      title: title.trim(),
+      description: description.trim() || null,
+      unit_code: unitCode,
+      priority,
+      due_date: dueDate || null,
+      assignee: assignee || null,
+    };
+    onSave(updated);
+  }
+
+  async function handleDelete() {
+    onDelete(task.id);
+  }
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(18,30,47,.52)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 1000,
+        padding: 24,
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: "white",
+          borderRadius: 12,
+          boxShadow: "0 8px 32px rgba(18,30,47,.18)",
+          width: "100%",
+          maxWidth: 480,
+          maxHeight: "90vh",
+          overflowY: "auto",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "20px 24px 16px",
+            borderBottom: "1px solid var(--color-mist)",
+          }}
+        >
+          <span
+            style={{
+              fontFamily: "var(--font-display)",
+              fontWeight: 700,
+              fontSize: 16,
+              color: "var(--color-navy)",
+            }}
+          >
+            Editar tarea
+          </span>
+          <button
+            onClick={onClose}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "var(--color-slate2)",
+              fontSize: 20,
+              lineHeight: 1,
+              padding: "2px 4px",
+              borderRadius: 4,
+            }}
+          >
+            ×
+          </button>
+        </div>
+
+        <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
+          <div>
+            <label style={labelStyle}>Título</label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              style={inputStyle}
+            />
+          </div>
+
+          <div>
+            <label style={labelStyle}>Descripción</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              style={{ ...inputStyle, resize: "vertical" }}
+            />
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div>
+              <label style={labelStyle}>Unidad</label>
+              <select
+                value={unitCode}
+                onChange={(e) => setUnitCode(e.target.value)}
+                style={inputStyle}
+              >
+                {units.map((u) => (
+                  <option key={u} value={u}>{u}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label style={labelStyle}>Prioridad</label>
+              <select
+                value={priority}
+                onChange={(e) => setPriority(e.target.value as Task["priority"])}
+                style={inputStyle}
+              >
+                <option value="alta">Alta</option>
+                <option value="media">Media</option>
+                <option value="baja">Baja</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label style={labelStyle}>Fecha límite</label>
+            <input
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              style={inputStyle}
+            />
+          </div>
+
+          <div>
+            <label style={labelStyle}>Responsable</label>
+            <select
+              value={assignee}
+              onChange={(e) => setAssignee(e.target.value)}
+              style={inputStyle}
+            >
+              <option value="">Sin asignar</option>
+              {profiles.map((p) => (
+                <option key={p.id} value={p.id}>{p.full_name}</option>
+              ))}
+            </select>
+            {assignee && (() => {
+              const profile = profiles.find((p) => p.id === assignee);
+              if (!profile) return null;
+              return (
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
+                  <div
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: "50%",
+                      background: profile.color,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 10,
+                      fontWeight: 700,
+                      color: "white",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {profile.initials}
+                  </div>
+                  <span style={{ fontSize: 13, color: "var(--color-ink)" }}>{profile.full_name}</span>
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+
+        <div
+          style={{
+            padding: "16px 24px 20px",
+            borderTop: "1px solid var(--color-mist)",
+            display: "flex",
+            flexDirection: "column",
+            gap: 10,
+          }}
+        >
+          <div style={{ display: "flex", gap: 10 }}>
+            <button
+              onClick={handleSave}
+              disabled={saving || !title.trim()}
+              style={{
+                flex: 1,
+                background: "var(--color-brand)",
+                color: "white",
+                border: "none",
+                borderRadius: 8,
+                padding: "10px 16px",
+                fontSize: 13.5,
+                fontWeight: 600,
+                cursor: saving ? "not-allowed" : "pointer",
+                fontFamily: "var(--font-sans)",
+                opacity: saving ? 0.7 : 1,
+              }}
+            >
+              {saving ? "Guardando..." : "Guardar cambios"}
+            </button>
+            <button
+              onClick={onClose}
+              style={{
+                flex: 1,
+                background: "transparent",
+                color: "var(--color-slate2)",
+                border: "1px solid var(--color-mist)",
+                borderRadius: 8,
+                padding: "10px 16px",
+                fontSize: 13.5,
+                fontWeight: 600,
+                cursor: "pointer",
+                fontFamily: "var(--font-sans)",
+              }}
+            >
+              Cancelar
+            </button>
+          </div>
+
+          {!confirmDelete ? (
+            <button
+              onClick={() => setConfirmDelete(true)}
+              style={{
+                background: "transparent",
+                color: "#C0392B",
+                border: "1px solid #F5C6C2",
+                borderRadius: 8,
+                padding: "9px 16px",
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: "pointer",
+                fontFamily: "var(--font-sans)",
+              }}
+            >
+              Eliminar tarea
+            </button>
+          ) : (
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                onClick={handleDelete}
+                style={{
+                  flex: 1,
+                  background: "#C0392B",
+                  color: "white",
+                  border: "none",
+                  borderRadius: 8,
+                  padding: "9px 16px",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  fontFamily: "var(--font-sans)",
+                }}
+              >
+                Confirmar eliminación
+              </button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                style={{
+                  flex: 1,
+                  background: "transparent",
+                  color: "var(--color-slate2)",
+                  border: "1px solid var(--color-mist)",
+                  borderRadius: 8,
+                  padding: "9px 16px",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  fontFamily: "var(--font-sans)",
+                }}
+              >
+                No, cancelar
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // ─── TaskCard (pure visual) ───────────────────────────────────────────────────
@@ -203,12 +545,20 @@ function TaskCard({
 function SortableCard({
   task,
   profiles,
+  onEdit,
 }: {
   task: Task;
   profiles: Profile[];
+  onEdit: (task: Task) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: task.id, data: { type: "card", task } });
+
+  const wasDragging = useRef(false);
+
+  useEffect(() => {
+    if (isDragging) wasDragging.current = true;
+  }, [isDragging]);
 
   return (
     <div
@@ -220,6 +570,13 @@ function SortableCard({
       }}
       {...attributes}
       {...listeners}
+      onClick={() => {
+        if (wasDragging.current) {
+          wasDragging.current = false;
+          return;
+        }
+        onEdit(task);
+      }}
     >
       <TaskCard task={task} profiles={profiles} />
     </div>
@@ -311,6 +668,7 @@ function KanbanColumn({
   units,
   isOver,
   onAddTask,
+  onEditTask,
 }: {
   column: (typeof COLUMNS)[number];
   tasks: Task[];
@@ -318,6 +676,7 @@ function KanbanColumn({
   units: string[];
   isOver: boolean;
   onAddTask: (task: Omit<Task, "id" | "position">) => void;
+  onEditTask: (task: Task) => void;
 }) {
   const [showForm, setShowForm] = useState(false);
 
@@ -335,7 +694,6 @@ function KanbanColumn({
         transition: "background 150ms, box-shadow 150ms",
       }}
     >
-      {/* Header */}
       <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 12 }}>
         <div style={{ width: 9, height: 9, borderRadius: "50%", background: column.color, flexShrink: 0 }} />
         <span style={{ fontSize: 14, fontWeight: 700, color: "var(--color-navy)", fontFamily: "var(--font-display)", flex: 1 }}>
@@ -346,16 +704,14 @@ function KanbanColumn({
         </span>
       </div>
 
-      {/* Drop zone + cards */}
       <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
         <div style={{ flex: 1, minHeight: 40 }}>
           {tasks.map((task) => (
-            <SortableCard key={task.id} task={task} profiles={profiles} />
+            <SortableCard key={task.id} task={task} profiles={profiles} onEdit={onEditTask} />
           ))}
         </div>
       </SortableContext>
 
-      {/* Add task */}
       {showForm ? (
         <AddTaskForm
           status={column.id}
@@ -404,6 +760,7 @@ export default function KanbanBoard({
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [overColumnId, setOverColumnId] = useState<Task["status"] | null>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   const supabase = createClient();
 
@@ -462,7 +819,6 @@ export default function KanbanBoard({
         t.id === activeId ? { ...t, status: targetStatus } : t
       );
 
-      // Reorder within target column
       const colTasks = next
         .filter((t) => t.status === targetStatus)
         .sort((a, b) => a.position - b.position);
@@ -470,7 +826,6 @@ export default function KanbanBoard({
       let reordered: Task[];
 
       if (columnIds.includes(overId)) {
-        // Dropped on column itself → move to end
         const without = colTasks.filter((t) => t.id !== activeId);
         reordered = [...without, next.find((t) => t.id === activeId)!];
       } else {
@@ -479,7 +834,6 @@ export default function KanbanBoard({
         if (fromIdx !== -1 && toIdx !== -1) {
           reordered = arrayMove(colTasks, fromIdx, toIdx);
         } else if (fromIdx === -1 && toIdx !== -1) {
-          // Cross-column move: insert at toIdx
           const without = colTasks.filter((t) => t.id !== activeId);
           without.splice(toIdx, 0, next.find((t) => t.id === activeId)!);
           reordered = without;
@@ -488,13 +842,11 @@ export default function KanbanBoard({
         }
       }
 
-      // Re-assign positions
       const posMap = new Map(reordered.map((t, i) => [t.id, i * 1000]));
       next = next.map((t) =>
         posMap.has(t.id) ? { ...t, position: posMap.get(t.id)! } : t
       );
 
-      // Persist after state is committed
       const updatedTask = next.find((t) => t.id === activeId)!;
       supabase
         .from("tasks")
@@ -522,13 +874,48 @@ export default function KanbanBoard({
     if (data) setTasks((prev) => [...prev, data as Task]);
   }
 
+  async function handleSaveTask(updated: Task) {
+    const { error } = await supabase
+      .from("tasks")
+      .update({
+        title: updated.title,
+        description: updated.description,
+        unit_code: updated.unit_code,
+        priority: updated.priority,
+        due_date: updated.due_date,
+        assignee: updated.assignee,
+      })
+      .eq("id", updated.id);
+
+    if (error) { console.error("Error saving task:", error); return; }
+    setTasks((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
+    setEditingTask(null);
+  }
+
+  async function handleDeleteTask(id: string) {
+    const { error } = await supabase.from("tasks").delete().eq("id", id);
+    if (error) { console.error("Error deleting task:", error); return; }
+    setTasks((prev) => prev.filter((t) => t.id !== id));
+    setEditingTask(null);
+  }
+
   const completedCount = tasks.filter((t) => t.status === "done").length;
   const totalCount = tasks.length;
   const completedPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   return (
     <div style={{ flex: 1, overflowY: "auto", padding: "24px 30px" }}>
-      {/* Construction banner */}
+      {editingTask && (
+        <TaskEditModal
+          task={editingTask}
+          profiles={profiles}
+          units={units}
+          onSave={handleSaveTask}
+          onDelete={handleDeleteTask}
+          onClose={() => setEditingTask(null)}
+        />
+      )}
+
       <div
         style={{
           background: "linear-gradient(135deg, var(--color-navy) 0%, var(--color-navy-700) 100%)",
@@ -565,7 +952,6 @@ export default function KanbanBoard({
         </span>
       </div>
 
-      {/* Stats row */}
       <div
         className="panel-stats"
         style={{
@@ -600,7 +986,6 @@ export default function KanbanBoard({
         ))}
       </div>
 
-      {/* Kanban */}
       <DndContext
         sensors={sensors}
         onDragStart={handleDragStart}
@@ -624,6 +1009,7 @@ export default function KanbanBoard({
               units={units}
               isOver={overColumnId === column.id}
               onAddTask={handleAddTask}
+              onEditTask={setEditingTask}
             />
           ))}
         </div>

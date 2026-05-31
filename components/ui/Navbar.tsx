@@ -37,7 +37,11 @@ export default function Navbar() {
     >
       <div className="w-[min(1200px,92vw)] mx-auto flex items-center justify-between h-[68px]">
         {/* Logo */}
-        <Link href="/" className="flex-shrink-0">
+        <Link
+          href="/"
+          className="flex-shrink-0"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        >
           <Image
             src="/nodo-logo-white.png"
             alt="Nodo Core"
