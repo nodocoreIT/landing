@@ -1,9 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { Settings } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import SettingsModal from "./SettingsModal";
 
 type NavItem = {
   label: string;
@@ -12,10 +15,13 @@ type NavItem = {
 };
 
 type SidebarProps = {
+  userId: string;
   userFullName: string;
   userEmail: string;
   userInitials: string;
   userColor: string;
+  userRole: string;
+  userAvatarUrl: string | null;
   taskCount: number;
   clientCount: number;
   teamCount: number;
@@ -34,16 +40,20 @@ const ECOSYSTEM_ITEMS: NavItem[] = [
 ];
 
 export default function Sidebar({
+  userId,
   userFullName,
   userEmail,
   userInitials,
   userColor,
+  userRole,
+  userAvatarUrl,
   taskCount,
   clientCount,
   teamCount,
 }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const [showSettings, setShowSettings] = useState(false);
 
   const counts: Record<string, number> = {
     "/panel/tareas": taskCount,
@@ -62,6 +72,7 @@ export default function Sidebar({
   }
 
   return (
+    <>
     <aside
       className="panel-sidebar"
       style={{
@@ -214,23 +225,38 @@ export default function Sidebar({
             marginBottom: 12,
           }}
         >
-          <div
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: "50%",
-              background: userColor,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 13,
-              fontWeight: 700,
-              color: "white",
-              flexShrink: 0,
-            }}
-          >
-            {userInitials}
-          </div>
+          {userAvatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={userAvatarUrl}
+              alt={userFullName}
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: "50%",
+                objectFit: "cover",
+                flexShrink: 0,
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: "50%",
+                background: userColor,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 13,
+                fontWeight: 700,
+                color: "white",
+                flexShrink: 0,
+              }}
+            >
+              {userInitials}
+            </div>
+          )}
           <div style={{ overflow: "hidden" }}>
             <p
               style={{
@@ -258,6 +284,38 @@ export default function Sidebar({
               {userEmail}
             </p>
           </div>
+          <button
+            onClick={() => setShowSettings(true)}
+            aria-label="Configuración de la cuenta"
+            title="Configuración"
+            style={{
+              marginLeft: "auto",
+              flexShrink: 0,
+              width: 32,
+              height: 32,
+              borderRadius: 8,
+              border: "none",
+              background: "transparent",
+              color: "rgba(234,240,247,.6)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              transition: "background 150ms, color 150ms",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.background =
+                "rgba(255,255,255,.08)";
+              (e.currentTarget as HTMLElement).style.color = "white";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.background = "transparent";
+              (e.currentTarget as HTMLElement).style.color =
+                "rgba(234,240,247,.6)";
+            }}
+          >
+            <Settings size={17} strokeWidth={1.9} />
+          </button>
         </div>
         <button
           onClick={handleSignOut}
@@ -289,5 +347,20 @@ export default function Sidebar({
         </button>
       </div>
     </aside>
+
+    {showSettings && (
+      <SettingsModal
+        userId={userId}
+        userEmail={userEmail}
+        initialFullName={userFullName}
+        initialRole={userRole}
+        initialAvatarUrl={userAvatarUrl}
+        initials={userInitials}
+        initialColor={userColor}
+        isAdmin={userRole === "admin"}
+        onClose={() => setShowSettings(false)}
+      />
+    )}
+    </>
   );
 }

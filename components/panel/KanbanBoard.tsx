@@ -39,6 +39,7 @@ export type Profile = {
   full_name: string;
   initials: string;
   color: string;
+  avatar_url?: string | null;
 };
 
 type KanbanBoardProps = {
@@ -74,6 +75,90 @@ const MONTH_NAMES = [
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr);
   return `${d.getDate()} ${MONTH_NAMES[d.getMonth()]}`;
+}
+
+// ─── AssigneeAvatar (photo or initials) ───────────────────────────────────────
+
+function AssigneeAvatar({
+  profile,
+  size = 26,
+  title,
+  withInitials = false,
+  ring = false,
+}: {
+  profile: Profile;
+  size?: number;
+  title?: string;
+  withInitials?: boolean;
+  ring?: boolean;
+}) {
+  const label = title ?? profile.full_name;
+  const boxShadow = ring ? "0 0 0 2px var(--color-brand)" : undefined;
+
+  const circle = profile.avatar_url ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={profile.avatar_url}
+      alt={label}
+      title={label}
+      style={{
+        width: size,
+        height: size,
+        borderRadius: "50%",
+        objectFit: "cover",
+        flexShrink: 0,
+        display: "block",
+        boxShadow,
+      }}
+    />
+  ) : (
+    <div
+      title={label}
+      style={{
+        width: size,
+        height: size,
+        borderRadius: "50%",
+        background: profile.color,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: Math.round(size * 0.38),
+        fontWeight: 700,
+        color: "white",
+        flexShrink: 0,
+        boxShadow,
+      }}
+    >
+      {/* Initials live in the caption below when withInitials is on. */}
+      {withInitials ? null : profile.initials}
+    </div>
+  );
+
+  if (!withInitials) return circle;
+
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 4,
+      }}
+    >
+      {circle}
+      <span
+        style={{
+          fontSize: 10.5,
+          fontWeight: 700,
+          lineHeight: 1,
+          color: "var(--color-slate2)",
+          fontFamily: "var(--font-sans)",
+        }}
+      >
+        {profile.initials}
+      </span>
+    </span>
+  );
 }
 
 // ─── TaskEditModal ────────────────────────────────────────────────────────────
@@ -285,23 +370,7 @@ function TaskEditModal({
               if (!profile) return null;
               return (
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
-                  <div
-                    style={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: "50%",
-                      background: profile.color,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: 10,
-                      fontWeight: 700,
-                      color: "white",
-                      flexShrink: 0,
-                    }}
-                  >
-                    {profile.initials}
-                  </div>
+                  <AssigneeAvatar profile={profile} size={28} />
                   <span style={{ fontSize: 13, color: "var(--color-ink)" }}>{profile.full_name}</span>
                 </div>
               );
@@ -515,26 +584,7 @@ function TaskCard({
         ) : (
           <span />
         )}
-        {assignee && (
-          <div
-            style={{
-              width: 26,
-              height: 26,
-              borderRadius: "50%",
-              background: assignee.color,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 10,
-              fontWeight: 700,
-              color: "white",
-              flexShrink: 0,
-            }}
-            title={assignee.full_name}
-          >
-            {assignee.initials}
-          </div>
-        )}
+        {assignee && <AssigneeAvatar profile={assignee} size={26} withInitials />}
       </div>
     </div>
   );
@@ -749,6 +799,83 @@ function KanbanColumn({
   );
 }
 
+// ─── AssigneeFilterBar (Jira-style assignee filter) ──────────────────────────
+
+function AssigneeFilterBar({
+  profiles,
+  selected,
+  onToggle,
+  onClear,
+}: {
+  profiles: Profile[];
+  selected: string[];
+  onToggle: (id: string) => void;
+  onClear: () => void;
+}) {
+  if (profiles.length === 0) return null;
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        marginBottom: 20,
+        flexWrap: "wrap",
+      }}
+    >
+      <span style={{ fontSize: 13, fontWeight: 600, color: "var(--color-slate2)" }}>
+        Filtrar por responsable
+      </span>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
+        {profiles.map((p) => {
+          const active = selected.includes(p.id);
+          const dimmed = selected.length > 0 && !active;
+          return (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => onToggle(p.id)}
+              title={p.full_name}
+              aria-pressed={active}
+              style={{
+                padding: 0,
+                border: "none",
+                background: "transparent",
+                cursor: "pointer",
+                opacity: dimmed ? 0.4 : 1,
+                transform: active ? "translateY(-3px)" : "none",
+                transition: "opacity 150ms, transform 150ms",
+                borderRadius: 8,
+              }}
+            >
+              <AssigneeAvatar profile={p} size={32} withInitials ring={active} />
+            </button>
+          );
+        })}
+      </div>
+      {selected.length > 0 && (
+        <button
+          onClick={onClear}
+          style={{
+            background: "transparent",
+            border: "1px solid var(--color-mist)",
+            borderRadius: 999,
+            padding: "5px 12px",
+            fontSize: 12.5,
+            fontWeight: 600,
+            color: "var(--color-slate2)",
+            cursor: "pointer",
+            fontFamily: "var(--font-sans)",
+          }}
+        >
+          Limpiar filtro
+        </button>
+      )}
+    </div>
+  );
+}
+
 // ─── KanbanBoard (root, owns DndContext) ──────────────────────────────────────
 
 export default function KanbanBoard({
@@ -761,6 +888,13 @@ export default function KanbanBoard({
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [overColumnId, setOverColumnId] = useState<Task["status"] | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [assigneeFilter, setAssigneeFilter] = useState<string[]>([]);
+
+  function toggleAssignee(id: string) {
+    setAssigneeFilter((prev) =>
+      prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]
+    );
+  }
 
   const supabase = createClient();
 
@@ -768,13 +902,16 @@ export default function KanbanBoard({
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
   );
 
-  const filteredTasks = searchTerm
-    ? tasks.filter(
-        (t) =>
-          t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (t.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false)
-      )
-    : tasks;
+  const filteredTasks = tasks.filter((t) => {
+    const matchesSearch =
+      !searchTerm ||
+      t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (t.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
+    const matchesAssignee =
+      assigneeFilter.length === 0 ||
+      (t.assignee !== null && assigneeFilter.includes(t.assignee));
+    return matchesSearch && matchesAssignee;
+  });
 
   function getColumnTasks(status: Task["status"]) {
     return filteredTasks
@@ -985,6 +1122,13 @@ export default function KanbanBoard({
           </div>
         ))}
       </div>
+
+      <AssigneeFilterBar
+        profiles={profiles}
+        selected={assigneeFilter}
+        onToggle={toggleAssignee}
+        onClear={() => setAssigneeFilter([])}
+      />
 
       <DndContext
         sensors={sensors}

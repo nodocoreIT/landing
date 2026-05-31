@@ -44,17 +44,28 @@ export default async function PanelLayout({
     redirect("/login");
   }
 
-  const [{ count: taskCount }, { count: clientCount }, { count: teamCount }] = await Promise.all([
+  const [
+    { count: taskCount },
+    { count: clientCount },
+    { count: teamCount },
+    { data: profile },
+  ] = await Promise.all([
     supabase.from("tasks").select("*", { count: "exact", head: true }),
     supabase.from("clients").select("*", { count: "exact", head: true }),
     supabase.from("profiles").select("*", { count: "exact", head: true }),
+    // select("*") stays column-agnostic so it works before/after the
+    // avatar_url column is added (see settings setup SQL).
+    supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
   ]);
 
   const email = user.email ?? "";
   const fullName =
-    user.user_metadata?.full_name ?? email.split("@")[0] ?? "Usuario";
+    profile?.full_name ?? user.user_metadata?.full_name ?? email.split("@")[0] ?? "Usuario";
+  const role = profile?.role ?? "dev";
+  const avatarUrl = profile?.avatar_url ?? null;
   const initials = getInitials(fullName);
-  const color = getAvatarColor(email);
+  // Prefer the persisted profile color; fall back to a deterministic one.
+  const color = profile?.color ?? getAvatarColor(email);
 
   return (
     <div
@@ -66,10 +77,13 @@ export default async function PanelLayout({
       }}
     >
       <Sidebar
+        userId={user.id}
         userFullName={fullName}
         userEmail={email}
         userInitials={initials}
         userColor={color}
+        userRole={role}
+        userAvatarUrl={avatarUrl}
         taskCount={taskCount ?? 0}
         clientCount={clientCount ?? 0}
         teamCount={teamCount ?? 0}

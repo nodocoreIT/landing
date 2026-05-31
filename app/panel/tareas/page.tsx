@@ -18,7 +18,8 @@ export default function TareasPage() {
 
       const [{ data: tasksData }, { data: profilesData }] = await Promise.all([
         supabase.from("tasks").select("*").order("position"),
-        supabase.from("profiles").select("id, full_name, initials, color"),
+        // select("*") stays safe whether or not avatar_url exists yet.
+        supabase.from("profiles").select("*"),
       ]);
 
       const taskList = (tasksData ?? []) as Task[];
