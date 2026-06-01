@@ -108,7 +108,7 @@ export default function EcosystemDiagram({
           cx={CX}
           cy={CY}
           r={HALO_R}
-          fill="rgba(218,90,14,.12)"
+          fill="#DA5A0E"
         />
         <circle cx={CX} cy={CY} r={CORE_R} fill="#DA5A0E" />
         <text

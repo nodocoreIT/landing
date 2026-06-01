@@ -129,8 +129,8 @@ function AssigneeAvatar({
         boxShadow,
       }}
     >
-      {/* Initials live in the caption below when withInitials is on. */}
-      {withInitials ? null : profile.initials}
+      {/* No photo → always show initials inside the circle. */}
+      {profile.initials}
     </div>
   );
 
@@ -146,17 +146,21 @@ function AssigneeAvatar({
       }}
     >
       {circle}
-      <span
-        style={{
-          fontSize: 10.5,
-          fontWeight: 700,
-          lineHeight: 1,
-          color: "var(--color-slate2)",
-          fontFamily: "var(--font-sans)",
-        }}
-      >
-        {profile.initials}
-      </span>
+      {/* Caption only when there's a photo — no-photo circles already show the
+          initials inside, so a caption would just duplicate them. */}
+      {profile.avatar_url && (
+        <span
+          style={{
+            fontSize: 10.5,
+            fontWeight: 700,
+            lineHeight: 1,
+            color: "var(--color-slate2)",
+            fontFamily: "var(--font-sans)",
+          }}
+        >
+          {profile.initials}
+        </span>
+      )}
     </span>
   );
 }
@@ -754,14 +758,6 @@ function KanbanColumn({
         </span>
       </div>
 
-      <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-        <div style={{ flex: 1, minHeight: 40 }}>
-          {tasks.map((task) => (
-            <SortableCard key={task.id} task={task} profiles={profiles} onEdit={onEditTask} />
-          ))}
-        </div>
-      </SortableContext>
-
       {showForm ? (
         <AddTaskForm
           status={column.id}
@@ -776,7 +772,7 @@ function KanbanColumn({
             width: "100%", padding: "8px 12px", borderRadius: 8,
             border: "1.5px dashed var(--color-slate2-300)", background: "transparent",
             color: "var(--color-slate2)", fontSize: 13, fontWeight: 600,
-            cursor: "pointer", fontFamily: "var(--font-sans)", marginTop: 4,
+            cursor: "pointer", fontFamily: "var(--font-sans)", marginBottom: 10,
             transition: "border-color 150ms, color 150ms, background 150ms",
           }}
           onMouseEnter={(e) => {
@@ -795,6 +791,14 @@ function KanbanColumn({
           + Agregar tarea
         </button>
       )}
+
+      <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
+        <div style={{ flex: 1, minHeight: 40 }}>
+          {tasks.map((task) => (
+            <SortableCard key={task.id} task={task} profiles={profiles} onEdit={onEditTask} />
+          ))}
+        </div>
+      </SortableContext>
     </div>
   );
 }

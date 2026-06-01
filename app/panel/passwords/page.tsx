@@ -64,7 +64,9 @@ export default function PasswordsPage() {
   useEffect(() => {
     async function getEmail() {
       const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (user?.email) setUserEmail(user.email);
     }
     getEmail();
@@ -165,7 +167,9 @@ export default function PasswordsPage() {
         return;
       }
     } else {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       const { error } = await supabase
         .from("vault_entries")
         .insert({ ...payload, created_by: user?.id ?? null });
@@ -191,8 +195,10 @@ export default function PasswordsPage() {
     ? entries.filter(
         (e) =>
           e.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (e.service?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
-          (e.username?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false)
+          (e.service?.toLowerCase().includes(searchTerm.toLowerCase()) ??
+            false) ||
+          (e.username?.toLowerCase().includes(searchTerm.toLowerCase()) ??
+            false),
       )
     : entries;
 
@@ -221,7 +227,7 @@ export default function PasswordsPage() {
       <>
         <Topbar
           breadcrumb="Nodo Core · Seguridad"
-          title="Contraseñas"
+          title="Bóveda de Contraseñas"
           searchValue=""
           onSearchChange={() => {}}
           searchPlaceholder=""
@@ -256,9 +262,18 @@ export default function PasswordsPage() {
                 margin: "0 auto 20px",
               }}
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
               </svg>
             </div>
             <h2
@@ -280,7 +295,8 @@ export default function PasswordsPage() {
                 lineHeight: 1.5,
               }}
             >
-              Ingrese su contraseña de cuenta para acceder a las credenciales guardadas.
+              Ingrese su contraseña de cuenta para acceder a las credenciales
+              guardadas.
             </p>
             <form
               onSubmit={(e) => {
@@ -303,7 +319,13 @@ export default function PasswordsPage() {
                 }}
               />
               {pinError && (
-                <p style={{ margin: "0 0 12px", fontSize: 12.5, color: "#C0392B" }}>
+                <p
+                  style={{
+                    margin: "0 0 12px",
+                    fontSize: 12.5,
+                    color: "#C0392B",
+                  }}
+                >
                   {pinError}
                 </p>
               )}
@@ -353,11 +375,16 @@ export default function PasswordsPage() {
           }}
         >
           <p style={{ margin: 0, fontSize: 14, color: "var(--color-slate2)" }}>
-            {filtered.length} {filtered.length === 1 ? "credencial" : "credenciales"} guardadas
+            {filtered.length}{" "}
+            {filtered.length === 1 ? "credencial" : "credenciales"} guardadas
           </p>
           <div style={{ display: "flex", gap: 10 }}>
             <button
-              onClick={() => { setUnlocked(false); setPin(""); setRevealedIds(new Set()); }}
+              onClick={() => {
+                setUnlocked(false);
+                setPin("");
+                setRevealedIds(new Set());
+              }}
               style={{
                 background: "transparent",
                 color: "var(--color-slate2)",
@@ -373,9 +400,18 @@ export default function PasswordsPage() {
                 gap: 6,
               }}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
               </svg>
               Bloquear
             </button>
@@ -399,17 +435,42 @@ export default function PasswordsPage() {
         </div>
 
         {loading ? (
-          <div style={{ textAlign: "center", padding: 40, color: "var(--color-slate2)", fontSize: 14 }}>
+          <div
+            style={{
+              textAlign: "center",
+              padding: 40,
+              color: "var(--color-slate2)",
+              fontSize: 14,
+            }}
+          >
             Cargando...
           </div>
         ) : filtered.length === 0 ? (
-          <div style={{ textAlign: "center", padding: 60, color: "var(--color-slate2)" }}>
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: "0 auto 12px", display: "block", opacity: 0.4 }}>
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          <div
+            style={{
+              textAlign: "center",
+              padding: 60,
+              color: "var(--color-slate2)",
+            }}
+          >
+            <svg
+              width="40"
+              height="40"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ margin: "0 auto 12px", display: "block", opacity: 0.4 }}
+            >
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
             <p style={{ margin: 0, fontSize: 14 }}>
-              {searchTerm ? "No se encontraron credenciales." : "No hay credenciales guardadas. Agregue la primera."}
+              {searchTerm
+                ? "No se encontraron credenciales."
+                : "No hay credenciales guardadas. Agregue la primera."}
             </p>
           </div>
         ) : (
@@ -428,14 +489,22 @@ export default function PasswordsPage() {
                     transition: "box-shadow 150ms",
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.boxShadow = "0 4px 16px rgba(18,30,47,.06)";
+                    e.currentTarget.style.boxShadow =
+                      "0 4px 16px rgba(18,30,47,.06)";
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.boxShadow = "none";
                   }}
                 >
                   {/* Top row */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 12,
+                      marginBottom: 14,
+                    }}
+                  >
                     <div
                       style={{
                         width: 38,
@@ -467,7 +536,13 @@ export default function PasswordsPage() {
                         {entry.label}
                       </p>
                       {entry.service && (
-                        <p style={{ margin: "2px 0 0", fontSize: 12.5, color: "var(--color-slate2)" }}>
+                        <p
+                          style={{
+                            margin: "2px 0 0",
+                            fontSize: 12.5,
+                            color: "var(--color-slate2)",
+                          }}
+                        >
                           {entry.service}
                         </p>
                       )}
@@ -489,9 +564,18 @@ export default function PasswordsPage() {
                           color: "var(--color-slate2)",
                         }}
                       >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                         </svg>
                       </button>
                       {confirmDeleteId === entry.id ? (
@@ -548,9 +632,18 @@ export default function PasswordsPage() {
                             color: "#C0392B",
                           }}
                         >
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="3 6 5 6 21 6"/>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                           </svg>
                         </button>
                       )}
@@ -561,7 +654,8 @@ export default function PasswordsPage() {
                   <div
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                      gridTemplateColumns:
+                        "repeat(auto-fit, minmax(200px, 1fr))",
                       gap: 12,
                       background: "#F8FAFC",
                       borderRadius: 8,
@@ -570,21 +664,65 @@ export default function PasswordsPage() {
                   >
                     {entry.username && (
                       <div>
-                        <p style={{ margin: "0 0 3px", fontSize: 11.5, fontWeight: 600, color: "var(--color-slate2)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                        <p
+                          style={{
+                            margin: "0 0 3px",
+                            fontSize: 11.5,
+                            fontWeight: 600,
+                            color: "var(--color-slate2)",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.05em",
+                          }}
+                        >
                           Usuario
                         </p>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <code style={{ fontSize: 13.5, color: "var(--color-ink)", fontFamily: "monospace" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 6,
+                          }}
+                        >
+                          <code
+                            style={{
+                              fontSize: 13.5,
+                              color: "var(--color-ink)",
+                              fontFamily: "monospace",
+                            }}
+                          >
                             {entry.username}
                           </code>
                           <button
                             onClick={() => copyToClipboard(entry.username!)}
                             title="Copiar"
-                            style={{ background: "transparent", border: "none", cursor: "pointer", color: "var(--color-slate2)", padding: 2, display: "flex" }}
+                            style={{
+                              background: "transparent",
+                              border: "none",
+                              cursor: "pointer",
+                              color: "var(--color-slate2)",
+                              padding: 2,
+                              display: "flex",
+                            }}
                           >
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            <svg
+                              width="13"
+                              height="13"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <rect
+                                x="9"
+                                y="9"
+                                width="13"
+                                height="13"
+                                rx="2"
+                                ry="2"
+                              />
+                              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                             </svg>
                           </button>
                         </div>
@@ -593,39 +731,108 @@ export default function PasswordsPage() {
 
                     {entry.password && (
                       <div>
-                        <p style={{ margin: "0 0 3px", fontSize: 11.5, fontWeight: 600, color: "var(--color-slate2)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                        <p
+                          style={{
+                            margin: "0 0 3px",
+                            fontSize: 11.5,
+                            fontWeight: 600,
+                            color: "var(--color-slate2)",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.05em",
+                          }}
+                        >
                           Contraseña
                         </p>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <code style={{ fontSize: 13.5, color: "var(--color-ink)", fontFamily: "monospace" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 6,
+                          }}
+                        >
+                          <code
+                            style={{
+                              fontSize: 13.5,
+                              color: "var(--color-ink)",
+                              fontFamily: "monospace",
+                            }}
+                          >
                             {revealed ? entry.password : "••••••••••"}
                           </code>
                           <button
                             onClick={() => toggleReveal(entry.id)}
                             title={revealed ? "Ocultar" : "Mostrar"}
-                            style={{ background: "transparent", border: "none", cursor: "pointer", color: "var(--color-slate2)", padding: 2, display: "flex" }}
+                            style={{
+                              background: "transparent",
+                              border: "none",
+                              cursor: "pointer",
+                              color: "var(--color-slate2)",
+                              padding: 2,
+                              display: "flex",
+                            }}
                           >
                             {revealed ? (
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
-                                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
-                                <line x1="1" y1="1" x2="23" y2="23"/>
+                              <svg
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                                <line x1="1" y1="1" x2="23" y2="23" />
                               </svg>
                             ) : (
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                <circle cx="12" cy="12" r="3"/>
+                              <svg
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                <circle cx="12" cy="12" r="3" />
                               </svg>
                             )}
                           </button>
                           <button
                             onClick={() => copyToClipboard(entry.password!)}
                             title="Copiar"
-                            style={{ background: "transparent", border: "none", cursor: "pointer", color: "var(--color-slate2)", padding: 2, display: "flex" }}
+                            style={{
+                              background: "transparent",
+                              border: "none",
+                              cursor: "pointer",
+                              color: "var(--color-slate2)",
+                              padding: 2,
+                              display: "flex",
+                            }}
                           >
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            <svg
+                              width="13"
+                              height="13"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <rect
+                                x="9"
+                                y="9"
+                                width="13"
+                                height="13"
+                                rx="2"
+                                ry="2"
+                              />
+                              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                             </svg>
                           </button>
                         </div>
@@ -634,14 +841,28 @@ export default function PasswordsPage() {
 
                     {entry.url && (
                       <div>
-                        <p style={{ margin: "0 0 3px", fontSize: 11.5, fontWeight: 600, color: "var(--color-slate2)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                        <p
+                          style={{
+                            margin: "0 0 3px",
+                            fontSize: 11.5,
+                            fontWeight: 600,
+                            color: "var(--color-slate2)",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.05em",
+                          }}
+                        >
                           URL
                         </p>
                         <a
                           href={entry.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          style={{ fontSize: 13, color: "var(--color-brand)", textDecoration: "none", wordBreak: "break-all" }}
+                          style={{
+                            fontSize: 13,
+                            color: "var(--color-brand)",
+                            textDecoration: "none",
+                            wordBreak: "break-all",
+                          }}
                         >
                           {entry.url}
                         </a>
@@ -650,7 +871,14 @@ export default function PasswordsPage() {
                   </div>
 
                   {entry.notes && (
-                    <p style={{ margin: "10px 0 0", fontSize: 13, color: "var(--color-slate2)", lineHeight: 1.5 }}>
+                    <p
+                      style={{
+                        margin: "10px 0 0",
+                        fontSize: 13,
+                        color: "var(--color-slate2)",
+                        lineHeight: 1.5,
+                      }}
+                    >
                       {entry.notes}
                     </p>
                   )}
@@ -672,7 +900,6 @@ export default function PasswordsPage() {
               justifyContent: "center",
               zIndex: 100,
             }}
-            onClick={(e) => { if (e.target === e.currentTarget) setShowForm(false); }}
           >
             <div
               style={{
@@ -726,7 +953,14 @@ export default function PasswordsPage() {
                 </button>
               </div>
 
-              <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 14 }}>
+              <div
+                style={{
+                  padding: "20px 24px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 14,
+                }}
+              >
                 <div>
                   <label style={labelStyle}>Nombre *</label>
                   <input
@@ -750,7 +984,13 @@ export default function PasswordsPage() {
                   />
                 </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: 12,
+                  }}
+                >
                   <div>
                     <label style={labelStyle}>Usuario / Email</label>
                     <input
@@ -796,7 +1036,9 @@ export default function PasswordsPage() {
                 </div>
 
                 {formError && (
-                  <p style={{ margin: 0, fontSize: 12.5, color: "#C0392B" }}>{formError}</p>
+                  <p style={{ margin: 0, fontSize: 12.5, color: "#C0392B" }}>
+                    {formError}
+                  </p>
                 )}
 
                 <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
@@ -817,7 +1059,11 @@ export default function PasswordsPage() {
                       opacity: saving ? 0.7 : 1,
                     }}
                   >
-                    {saving ? "Guardando..." : editingEntry ? "Guardar cambios" : "Guardar credencial"}
+                    {saving
+                      ? "Guardando..."
+                      : editingEntry
+                        ? "Guardar cambios"
+                        : "Guardar credencial"}
                   </button>
                   <button
                     onClick={() => setShowForm(false)}

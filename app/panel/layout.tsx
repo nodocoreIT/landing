@@ -48,11 +48,15 @@ export default async function PanelLayout({
     { count: taskCount },
     { count: clientCount },
     { count: teamCount },
+    { count: expenseCount },
+    { count: ideaCount },
     { data: profile },
   ] = await Promise.all([
     supabase.from("tasks").select("*", { count: "exact", head: true }),
     supabase.from("clients").select("*", { count: "exact", head: true }),
     supabase.from("profiles").select("*", { count: "exact", head: true }),
+    supabase.from("expenses").select("*", { count: "exact", head: true }),
+    supabase.from("ideas").select("*", { count: "exact", head: true }),
     // select("*") stays column-agnostic so it works before/after the
     // avatar_url column is added (see settings setup SQL).
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
@@ -87,6 +91,8 @@ export default async function PanelLayout({
         taskCount={taskCount ?? 0}
         clientCount={clientCount ?? 0}
         teamCount={teamCount ?? 0}
+        expenseCount={expenseCount ?? 0}
+        ideaCount={ideaCount ?? 0}
       />
       <main
         style={{

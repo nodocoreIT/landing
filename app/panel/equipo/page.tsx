@@ -57,15 +57,6 @@ export default function EquipoPage() {
       .toUpperCase();
   }
 
-  function getColor(name: string): string {
-    const colors = ["#2A6FDB", "#1F8A5B", "#DA5A0E", "#7C3AED", "#DB2777", "#0891B2"];
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) {
-      hash = name.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return colors[Math.abs(hash) % colors.length];
-  }
-
   function openAddForm() {
     setEditingMember(null);
     setFormName("");
@@ -109,27 +100,21 @@ export default function EquipoPage() {
         setSaving(false);
         return;
       }
-      const { data: authData, error: authErr } = await supabase.auth.signUp({
-        email: formEmail.trim(),
-        password: formPassword.trim(),
-        options: { data: { full_name: formName.trim() } },
+      // Create via the admin API on the server so the user is confirmed and our
+      // own admin session is left intact (client signUp would break both).
+      const res = await fetch("/api/team", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: formName.trim(),
+          email: formEmail.trim(),
+          password: formPassword.trim(),
+          role: formRole,
+        }),
       });
-      if (authErr || !authData.user) {
-        setError(authErr?.message ?? "Error al crear el usuario.");
-        setSaving(false);
-        return;
-      }
-      const initials = getInitials(formName.trim());
-      const color = getColor(formName.trim());
-      const { error: profileErr } = await supabase.from("profiles").insert({
-        id: authData.user.id,
-        full_name: formName.trim(),
-        role: formRole,
-        initials,
-        color,
-      });
-      if (profileErr) {
-        setError("Usuario creado pero error al crear perfil: " + profileErr.message);
+      const result = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(result.error ?? "Error al crear el usuario.");
         setSaving(false);
         return;
       }
@@ -327,7 +312,6 @@ export default function EquipoPage() {
               justifyContent: "center",
               zIndex: 100,
             }}
-            onClick={(e) => { if (e.target === e.currentTarget) setShowForm(false); }}
           >
             <div
               style={{
@@ -410,6 +394,7 @@ export default function EquipoPage() {
                         onChange={(e) => setFormEmail(e.target.value)}
                         style={inputStyle}
                         placeholder="email@ejemplo.com"
+                        autoComplete="off"
                       />
                     </div>
                     <div>
@@ -420,6 +405,7 @@ export default function EquipoPage() {
                         onChange={(e) => setFormPassword(e.target.value)}
                         style={inputStyle}
                         placeholder="Mínimo 6 caracteres"
+                        autoComplete="new-password"
                       />
                     </div>
                   </>

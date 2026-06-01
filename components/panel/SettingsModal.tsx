@@ -218,9 +218,6 @@ export default function SettingsModal({
         justifyContent: "center",
         zIndex: 100,
       }}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
     >
       <div
         style={{
