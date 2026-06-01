@@ -12,6 +12,8 @@ export function createAdminClient() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     {
+      // All app tables now live in the nodo_core schema (see schema migration).
+      db: { schema: "nodo_core" },
       auth: {
         autoRefreshToken: false,
         persistSession: false,
