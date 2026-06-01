@@ -25,9 +25,7 @@ export default function Navbar() {
     <nav
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
       style={{
-        backgroundColor: scrolled
-          ? "rgba(18,30,47,.85)"
-          : "rgba(18,30,47,.6)",
+        backgroundColor: scrolled ? "rgba(18,30,47,.85)" : "rgba(18,30,47,.6)",
         backdropFilter: "blur(16px)",
         WebkitBackdropFilter: "blur(16px)",
         borderBottom: scrolled
@@ -71,12 +69,6 @@ export default function Navbar() {
 
         {/* Right CTAs */}
         <div className="flex items-center gap-3">
-          <Link
-            href="/login"
-            className="nav-access-btn inline-block text-[14px] font-semibold text-white/80 hover:text-white transition-colors duration-150 px-4 py-2 rounded-md border border-white/20 hover:border-white/40"
-          >
-            Acceso clientes
-          </Link>
           <button
             onClick={() => {
               const el = document.querySelector("#contacto");
@@ -86,6 +78,12 @@ export default function Navbar() {
           >
             Solicitar demo
           </button>
+          <Link
+            href="/login"
+            className="nav-access-btn inline-block text-[14px] font-semibold text-white/80 hover:text-white transition-colors duration-150 px-4 py-2 rounded-md border border-white/20 hover:border-white/40"
+          >
+            Login Administracion
+          </Link>
         </div>
       </div>
     </nav>

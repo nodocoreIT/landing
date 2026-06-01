@@ -44,7 +44,9 @@ export default function LoginPage() {
     });
 
     if (error) {
-      setGeneralError("Credenciales incorrectas. Verifique e intente nuevamente.");
+      setGeneralError(
+        "Credenciales incorrectas. Verifique e intente nuevamente.",
+      );
       setLoading(false);
       return;
     }
@@ -61,12 +63,12 @@ export default function LoginPage() {
 
   return (
     <>
-      {/* Back button */}
+      {/* Back button — top-right of the (light) form panel, brand-colored. */}
       <Link
         href="/"
-        className="fixed top-[22px] left-[22px] z-10 inline-flex items-center gap-2 px-4 py-2 text-[14px] font-semibold rounded-md border border-ink/15 text-ink hover:border-ink/30 hover:bg-ink/[.03] transition-all duration-150"
+        className="fixed top-[22px] right-[22px] z-10 inline-flex items-center gap-2 px-4 py-2 text-[14px] font-semibold rounded-md bg-brand text-white shadow-sm hover:bg-brand-600 active:scale-[.98] transition-all duration-150"
       >
-        ← Volver
+        ← Volver a la web
       </Link>
 
       <div className="min-h-screen grid grid-cols-1 login-split">
@@ -192,18 +194,40 @@ export default function LoginPage() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate2 hover:text-ink cursor-pointer select-none bg-transparent border-none p-1"
-                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  aria-label={
+                    showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+                  }
                 >
                   {showPassword ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
-                      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
-                      <line x1="1" y1="1" x2="23" y2="23"/>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                      <line x1="1" y1="1" x2="23" y2="23" />
                     </svg>
                   ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                      <circle cx="12" cy="12" r="3"/>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
                     </svg>
                   )}
                 </button>
@@ -218,7 +242,11 @@ export default function LoginPage() {
             {/* Remember + forgot */}
             <div className="flex items-center justify-between mb-5">
               <label className="flex items-center gap-2 text-[13.5px] text-slate2 cursor-pointer">
-                <input type="checkbox" defaultChecked className="accent-brand" />
+                <input
+                  type="checkbox"
+                  defaultChecked
+                  className="accent-brand"
+                />
                 Mantener sesión iniciada
               </label>
               <span className="text-[13.5px] text-brand font-semibold cursor-pointer">
@@ -241,12 +269,11 @@ export default function LoginPage() {
             >
               {loading ? "Ingresando…" : "Ingresar al panel"}
             </button>
-
-            {/* Demo hint */}
+            {/* TODO BORRAR ESTE DIV
             <div className="mt-4 p-3 rounded-md bg-mist-200 border border-mist text-[12.5px] text-slate2">
               Demostración: use <strong className="text-navy">admin@nodocore.com</strong>{" "}
               y cualquier contraseña de 4+ caracteres.
-            </div>
+            </div> */}
           </form>
         </main>
       </div>

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Settings } from "lucide-react";
+import { Settings, Video } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import SettingsModal from "./SettingsModal";
@@ -210,6 +210,46 @@ export default function Sidebar({
           ))}
         </div>
       </nav>
+
+      {/* Zoom Meeting */}
+      <div style={{ padding: "0 12px 12px" }}>
+        <a
+          href="https://us05web.zoom.us/j/85456616409?pwd=OmLUE8DbGEkE6ilJpFNdfPEvj3J8Zg.1"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
+            width: "100%",
+            padding: "9px 10px",
+            borderRadius: 8,
+            border: "none",
+            background: "rgba(45,140,255,.15)",
+            color: "rgba(100,180,255,.9)",
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: "pointer",
+            textDecoration: "none",
+            transition: "background 150ms, color 150ms",
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.background =
+              "rgba(45,140,255,.25)";
+            (e.currentTarget as HTMLElement).style.color = "white";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.background =
+              "rgba(45,140,255,.15)";
+            (e.currentTarget as HTMLElement).style.color =
+              "rgba(100,180,255,.9)";
+          }}
+        >
+          <Video size={16} strokeWidth={2} />
+          Unirme a reunión
+        </a>
+      </div>
 
       {/* Footer */}
       <div
