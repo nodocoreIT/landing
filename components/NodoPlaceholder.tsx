@@ -39,7 +39,7 @@ export default function NodoPlaceholder({ slug }: { slug: string }) {
   const node = getNodeBySlug(slug);
   if (!node) notFound();
 
-  const { Icon, label, description, intro, highlights } = node;
+  const { Icon, code, description, intro, highlights } = node;
 
   return (
     <div style={{ backgroundColor: "var(--color-navy-900)" }}>
@@ -69,10 +69,17 @@ export default function NodoPlaceholder({ slug }: { slug: string }) {
             </p>
 
             <h1
-              className="font-display font-extrabold text-white max-w-[14em]"
+              className="font-display font-extrabold text-white flex flex-wrap items-center justify-center gap-x-4 gap-y-1"
               style={{ fontSize: "clamp(36px,5vw,64px)", lineHeight: 1.06 }}
             >
-              {label}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/logos/nodo%20nar.png"
+                alt="Nodo"
+                style={{ height: "0.78em", width: "auto", display: "inline-block" }}
+              />
+              <span style={{ color: "#fff", fontWeight: 400 }}>|</span>
+              {code}
             </h1>
 
             <p

@@ -28,7 +28,7 @@ export default function Navbar() {
   // <Link> navigate to /#id so the home page loads and jumps to the section.
   function handleSectionClick(
     e: React.MouseEvent<HTMLAnchorElement>,
-    id: string
+    id: string,
   ) {
     if (isHome) {
       e.preventDefault();
@@ -99,7 +99,7 @@ export default function Navbar() {
             href="/login"
             className="nav-access-btn inline-block text-[14px] font-semibold text-white/80 hover:text-white transition-colors duration-150 px-4 py-2 rounded-md border border-white/20 hover:border-white/40"
           >
-            Login Administracion
+            Login
           </Link>
         </div>
       </div>

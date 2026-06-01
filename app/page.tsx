@@ -218,9 +218,22 @@ function FilosofiaSection() {
                 borderLeft: "2px solid var(--color-brand)",
               }}
             >
-              Un <em>nodo</em> es el punto de intersección donde convergen
-              distintas ramas. El <strong>Core</strong> es ese punto central que
-              irradia soluciones hacia cada unidad especializada.
+              Un{" "}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/logos/nodo%20nar.png"
+                alt="nodo"
+                style={{
+                  height: "0.82em",
+                  width: "auto",
+                  display: "inline-block",
+                  verticalAlign: "-0.04em",
+                  margin: "0 2px",
+                }}
+              />{" "}
+              es el punto de intersección donde convergen distintas ramas. El{" "}
+              <strong>Core</strong> es ese punto central que irradia soluciones
+              hacia cada unidad especializada.
             </p>
             <p
               className="text-[15.5px] leading-relaxed"
@@ -288,12 +301,18 @@ function UnidadRow({ node, index }: { node: NodeDef; index: string }) {
       {/* Tag */}
       <span className="flex items-center gap-3 font-display font-bold text-white text-[20px]">
         <Icon
-          className="w-5 h-5 text-brand shrink-0"
+          className="w-5 h-5 text-white shrink-0"
           strokeWidth={1.75}
           aria-hidden="true"
         />
-        <span>
-          nodo <span className="text-brand font-normal mx-[.3em]">|</span>{" "}
+        <span className="flex items-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logos/nodo%20nar.png"
+            alt="nodo"
+            style={{ height: "0.7em", width: "auto", display: "inline-block" }}
+          />
+          <span className="text-white font-normal mx-[.3em]">|</span>
           {node.code}
         </span>
       </span>
