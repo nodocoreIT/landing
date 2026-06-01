@@ -5,6 +5,7 @@ import ContactForm from "@/components/ui/ContactForm";
 import RevealOnScroll from "@/components/ui/RevealOnScroll";
 import EcosystemDiagram from "@/components/EcosystemDiagram";
 import { NODES, type NodeDef } from "@/lib/nodes";
+import { Activity, Headset, TrendingUp } from "lucide-react";
 
 // ─── Data ───────────────────────────────────────────────────────────────────
 
@@ -13,16 +14,19 @@ const BENEFIT_CARDS = [
     title: "Visibilidad en tiempo real",
     description:
       "Avances, datos financieros y gestión, siempre disponibles desde una plataforma personalizada para su operación.",
+    Icon: Activity,
   },
   {
     title: "Un único interlocutor",
     description:
       "Elimine la fragmentación: Nodo es el único punto de contacto para todas sus unidades de negocio.",
+    Icon: Headset,
   },
   {
     title: "Oportunidades, no solo soluciones",
     description:
       "Pasamos de resolver problemas a generar oportunidades de negocio, incluso formando grupos inversores.",
+    Icon: TrendingUp,
   },
 ];
 
@@ -352,7 +356,7 @@ function BeneficiosSection() {
         style={{ gridTemplateColumns: "repeat(3, 1fr)" }}
       >
         {BENEFIT_CARDS.map((card, i) => (
-          <RevealOnScroll key={card.title} delay={i * 80}>
+          <RevealOnScroll key={card.title} delay={i * 80} className="h-full">
             <BenefitCard card={card} />
           </RevealOnScroll>
         ))}
@@ -362,9 +366,10 @@ function BeneficiosSection() {
 }
 
 function BenefitCard({ card }: { card: (typeof BENEFIT_CARDS)[number] }) {
+  const { Icon } = card;
   return (
     <div
-      className="rounded-lg p-[30px] bg-white transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
+      className="h-full rounded-lg p-[30px] bg-white transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
       style={{ border: "1px solid var(--color-mist)" }}
     >
       {/* Icon */}
@@ -372,9 +377,10 @@ function BenefitCard({ card }: { card: (typeof BENEFIT_CARDS)[number] }) {
         className="w-[46px] h-[46px] rounded-[13px] flex items-center justify-center mb-5"
         style={{ backgroundColor: "var(--color-navy)" }}
       >
-        <div
-          className="w-[14px] h-[14px] rounded-full"
-          style={{ backgroundColor: "var(--color-brand)" }}
+        <Icon
+          className="w-[22px] h-[22px] text-brand"
+          strokeWidth={1.9}
+          aria-hidden="true"
         />
       </div>
 
@@ -435,7 +441,7 @@ function ContactoSection() {
                     className="text-[15px]"
                     style={{ color: "rgba(234,240,247,.8)" }}
                   >
-                    ✉ hola@nodocore.com
+                    ✉ contacto@nodocore.com
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
@@ -450,7 +456,7 @@ function ContactoSection() {
             </div>
 
             {/* Right: form */}
-            <div>
+            <div className="h-full">
               <ContactForm />
             </div>
           </div>

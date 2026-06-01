@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { sendContactEmail, isMailConfigured } from "@/lib/mail";
 
 export type ContactFormState = {
   status: "idle" | "success" | "error";
@@ -38,6 +39,20 @@ export async function submitContactForm(
         status: "error",
         message: "Hubo un problema al enviar. Por favor intente nuevamente.",
       };
+    }
+
+    // Notify by email (best-effort): the lead is already saved, so a mail
+    // hiccup shouldn't fail the user's submission.
+    if (isMailConfigured()) {
+      try {
+        await sendContactEmail({ nombre, email, mensaje });
+      } catch (mailErr) {
+        console.error("Contact email error:", mailErr);
+      }
+    } else {
+      console.warn(
+        "Contact email skipped: SMTP env vars not configured (ZOHO_SMTP_USER / ZOHO_SMTP_PASSWORD)."
+      );
     }
 
     return { status: "success", message: "" };

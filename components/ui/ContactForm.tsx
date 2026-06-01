@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { submitContactForm, type ContactFormState } from "@/app/actions";
 
@@ -32,13 +32,46 @@ function SubmitButton() {
 
 export default function ContactForm() {
   const [state, formAction] = useActionState(submitContactForm, initialState);
+  // Tracks the success state we've already dismissed, so a new submission
+  // shows the thank-you message again.
+  const [dismissedState, setDismissedState] =
+    useState<ContactFormState | null>(null);
+  const successRef = useRef<HTMLDivElement>(null);
 
-  if (state.status === "success") {
+  // After a successful send, show the thank-you message, then bring back a
+  // fresh empty form — either after 10s or once it scrolls out of view.
+  useEffect(() => {
+    if (state.status !== "success" || dismissedState === state) return;
+
+    const timer = setTimeout(() => setDismissedState(state), 10000);
+
+    let observer: IntersectionObserver | undefined;
+    const el = successRef.current;
+    if (el) {
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          if (!entry.isIntersecting) setDismissedState(state);
+        },
+        { threshold: 0 }
+      );
+      observer.observe(el);
+    }
+
+    return () => {
+      clearTimeout(timer);
+      observer?.disconnect();
+    };
+  }, [state, dismissedState]);
+
+  if (state.status === "success" && dismissedState !== state) {
     return (
-      <div className="flex items-center gap-3 py-6">
+      <div
+        ref={successRef}
+        className="flex h-full min-h-[160px] items-center justify-center text-center py-8"
+      >
         <span
-          className="text-[17px] font-semibold"
-          style={{ color: "var(--color-brand-300)" }}
+          className="text-[21px] font-semibold leading-snug"
+          style={{ color: "#1F8A5B" }}
         >
           ✓ ¡Gracias! Nos pondremos en contacto pronto.
         </span>

@@ -1,24 +1,53 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/ui/Navbar";
 import Footer from "@/components/ui/Footer";
 import { getNodeBySlug } from "@/lib/nodes";
 
-// Temporary landing for each business unit while the real /nodo-* pages are
-// built. Reads its content from the shared NODES catalog so a single edit keeps
-// the diagram and these pages in sync.
+// Renders intro copy, swapping the word "NODO" for the brand wordmark inline.
+function IntroWithLogo({ text }: { text: string }) {
+  const parts = text.split(/\bNODO\b/g);
+  return (
+    <>
+      {parts.map((part, i) => (
+        <Fragment key={i}>
+          {i > 0 && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src="/logos/nodo%20nar.png"
+              alt="NODO"
+              style={{
+                height: "0.82em",
+                width: "auto",
+                display: "inline-block",
+                verticalAlign: "-0.04em",
+                margin: "0 2px",
+              }}
+            />
+          )}
+          {part}
+        </Fragment>
+      ))}
+    </>
+  );
+}
+
+// Landing for each business unit. Reads its content from the shared NODES
+// catalog so a single edit keeps the diagram, the list and these pages in sync.
 export default function NodoPlaceholder({ slug }: { slug: string }) {
   const node = getNodeBySlug(slug);
   if (!node) notFound();
 
-  const { Icon, label, description } = node;
+  const { Icon, label, description, intro, highlights } = node;
 
   return (
     <div style={{ backgroundColor: "var(--color-navy-900)" }}>
       <Navbar />
       <main>
+        {/* Hero */}
         <section
-          className="relative overflow-hidden pt-[160px] pb-[clamp(80px,12vw,160px)]"
+          className="relative overflow-hidden pt-[160px] pb-[clamp(56px,8vw,96px)]"
           style={{ backgroundColor: "var(--color-navy-900)" }}
         >
           <div
@@ -56,9 +85,11 @@ export default function NodoPlaceholder({ slug }: { slug: string }) {
               {description}
             </p>
 
-            <p className="mt-4 text-[14px] text-white/45">
-              Esta sección está en construcción.
-            </p>
+            {!intro && (
+              <p className="mt-4 text-[14px] text-white/45">
+                Esta sección está en construcción.
+              </p>
+            )}
 
             <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
               <Link
@@ -76,6 +107,57 @@ export default function NodoPlaceholder({ slug }: { slug: string }) {
             </div>
           </div>
         </section>
+
+        {/* Content */}
+        {intro && (
+          <section
+            className="py-[clamp(48px,7vw,96px)]"
+            style={{
+              backgroundColor: "var(--color-navy)",
+              borderTop: "1px solid rgba(255,255,255,.08)",
+            }}
+          >
+            <div className="w-[min(1200px,92vw)] mx-auto">
+              <p
+                className="max-w-[720px] mx-auto leading-relaxed text-center"
+                style={{
+                  fontSize: "clamp(16px,1.4vw,19px)",
+                  color: "rgba(234,240,247,.78)",
+                }}
+              >
+                <IntroWithLogo text={intro} />
+              </p>
+
+              {highlights && highlights.length > 0 && (
+                <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-5">
+                  {highlights.map((h) => (
+                    <div
+                      key={h.title}
+                      className="rounded-xl p-6"
+                      style={{
+                        background: "var(--color-navy-700)",
+                        border: "1px solid rgba(255,255,255,.1)",
+                      }}
+                    >
+                      <h3
+                        className="font-display font-bold text-brand-300"
+                        style={{ fontSize: 17, marginBottom: 8 }}
+                      >
+                        {h.title}
+                      </h3>
+                      <p
+                        className="leading-relaxed"
+                        style={{ fontSize: 14.5, color: "rgba(234,240,247,.7)" }}
+                      >
+                        {h.description}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+        )}
       </main>
       <Footer />
     </div>

@@ -3,16 +3,19 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const navLinks = [
-  { label: "Filosofía", href: "#filosofia" },
-  { label: "Unidades", href: "#unidades" },
-  { label: "Beneficios", href: "#beneficios" },
-  { label: "Contacto", href: "#contacto" },
+  { label: "Filosofía", id: "filosofia" },
+  { label: "Unidades", id: "unidades" },
+  { label: "Beneficios", id: "beneficios" },
+  { label: "Contacto", id: "contacto" },
 ];
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname();
+  const isHome = pathname === "/";
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 8);
@@ -20,6 +23,19 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // On the home page, intercept and smooth-scroll. On any other route, let the
+  // <Link> navigate to /#id so the home page loads and jumps to the section.
+  function handleSectionClick(
+    e: React.MouseEvent<HTMLAnchorElement>,
+    id: string
+  ) {
+    if (isHome) {
+      e.preventDefault();
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+      window.history.replaceState(null, "", `/#${id}`);
+    }
+  }
 
   return (
     <nav
@@ -38,10 +54,15 @@ export default function Navbar() {
         <Link
           href="/"
           className="flex-shrink-0"
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          onClick={(e) => {
+            if (isHome) {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+          }}
         >
           <Image
-            src="/nodo-logo-white.png"
+            src="/logos/logo%20compuesto.png"
             alt="Nodo Core"
             height={32}
             width={137}
@@ -53,31 +74,27 @@ export default function Navbar() {
         {/* Center links */}
         <ul className="nav-links flex items-center gap-8 list-none m-0 p-0">
           {navLinks.map((link) => (
-            <li key={link.href}>
-              <button
-                onClick={() => {
-                  const el = document.querySelector(link.href);
-                  if (el) el.scrollIntoView({ behavior: "smooth" });
-                }}
+            <li key={link.id}>
+              <Link
+                href={`/#${link.id}`}
+                onClick={(e) => handleSectionClick(e, link.id)}
                 className="text-[14.5px] font-medium text-white/70 hover:text-white transition-colors duration-150 bg-transparent border-none cursor-pointer p-0"
               >
                 {link.label}
-              </button>
+              </Link>
             </li>
           ))}
         </ul>
 
         {/* Right CTAs */}
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => {
-              const el = document.querySelector("#contacto");
-              if (el) el.scrollIntoView({ behavior: "smooth" });
-            }}
+          <Link
+            href="/#contacto"
+            onClick={(e) => handleSectionClick(e, "contacto")}
             className="inline-flex items-center justify-center px-5 py-2.5 text-[14px] font-semibold rounded-md bg-brand text-white hover:bg-brand-600 transition-colors duration-150 border-none cursor-pointer"
           >
             Solicitar demo
-          </button>
+          </Link>
           <Link
             href="/login"
             className="nav-access-btn inline-block text-[14px] font-semibold text-white/80 hover:text-white transition-colors duration-150 px-4 py-2 rounded-md border border-white/20 hover:border-white/40"
