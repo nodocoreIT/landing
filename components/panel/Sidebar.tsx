@@ -31,6 +31,7 @@ const PLATFORM_ITEMS: NavItem[] = [
   { label: "Tareas", href: "/panel/tareas" },
   { label: "Clientes", href: "/panel/clientes" },
   { label: "Equipo", href: "/panel/equipo" },
+  { label: "Contraseñas", href: "/panel/passwords" },
 ];
 
 const ECOSYSTEM_ITEMS: NavItem[] = [

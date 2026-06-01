@@ -26,7 +26,7 @@ const BENEFIT_CARDS = [
   },
 ];
 
-const PILLS = ["Inmo", "Obra", "Capital", "IT", "Legal", "Seguros", "Agro"];
+const PILLS = ["Inmo", "Obra", "Capital", "IT", "Legal", "Agro", "Contable"];
 
 // ─── Shared layout helpers ───────────────────────────────────────────────────
 

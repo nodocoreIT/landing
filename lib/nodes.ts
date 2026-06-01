@@ -62,14 +62,14 @@ export const NODES: NodeDef[] = [
       "Asesoramiento jurídico integral, transversal a todas las áreas.",
     Icon: Scale,
   },
-  {
-    code: "Seguros",
-    slug: "seguros",
-    label: "Nodo Seguros",
-    description:
-      "Protección estratégica para blindar los activos del ecosistema.",
-    Icon: ShieldCheck,
-  },
+  // {
+  //   code: "Seguros",
+  //   slug: "seguros",
+  //   label: "Nodo Seguros",
+  //   description:
+  //     "Protección estratégica para blindar los activos del ecosistema.",
+  //   Icon: ShieldCheck,
+  // },
   {
     code: "Agro",
     slug: "agro",

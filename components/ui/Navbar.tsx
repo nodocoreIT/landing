@@ -56,12 +56,15 @@ export default function Navbar() {
         <ul className="nav-links flex items-center gap-8 list-none m-0 p-0">
           {navLinks.map((link) => (
             <li key={link.href}>
-              <a
-                href={link.href}
-                className="text-[14.5px] font-medium text-white/70 hover:text-white transition-colors duration-150"
+              <button
+                onClick={() => {
+                  const el = document.querySelector(link.href);
+                  if (el) el.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="text-[14.5px] font-medium text-white/70 hover:text-white transition-colors duration-150 bg-transparent border-none cursor-pointer p-0"
               >
                 {link.label}
-              </a>
+              </button>
             </li>
           ))}
         </ul>
@@ -74,12 +77,15 @@ export default function Navbar() {
           >
             Acceso clientes
           </Link>
-          <a
-            href="#contacto"
-            className="inline-flex items-center justify-center px-5 py-2.5 text-[14px] font-semibold rounded-md bg-brand text-white hover:bg-brand-600 transition-colors duration-150"
+          <button
+            onClick={() => {
+              const el = document.querySelector("#contacto");
+              if (el) el.scrollIntoView({ behavior: "smooth" });
+            }}
+            className="inline-flex items-center justify-center px-5 py-2.5 text-[14px] font-semibold rounded-md bg-brand text-white hover:bg-brand-600 transition-colors duration-150 border-none cursor-pointer"
           >
             Solicitar demo
-          </a>
+          </button>
         </div>
       </div>
     </nav>
