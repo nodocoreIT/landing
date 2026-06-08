@@ -27,6 +27,7 @@ type ClientUnit = {
   access_url: string | null;
   access_user: string | null;
   access_password: string | null;
+  provisioned_at: string | null;
 };
 
 // Local form representation of a nodo (with a stable key for React lists).
@@ -39,6 +40,7 @@ type FormUnit = {
   access_url: string;
   access_user: string;
   access_password: string;
+  provisioned_at: string | null;
 };
 
 const STATUS_STYLES: Record<ClientStatus, { bg: string; color: string; label: string }> = {
@@ -67,6 +69,7 @@ function newFormUnit(): FormUnit {
     access_url: "",
     access_user: "",
     access_password: "",
+    provisioned_at: null,
   };
 }
 
@@ -164,6 +167,7 @@ export default function ClientesPage() {
             access_url: u.access_url ?? "",
             access_user: u.access_user ?? "",
             access_password: u.access_password ?? "",
+            provisioned_at: u.provisioned_at ?? null,
           }))
         : [newFormUnit()]
     );
@@ -201,6 +205,9 @@ export default function ClientesPage() {
 
     let clientId: string;
 
+    // Capture previous units before deleting — needed to detect provisioning changes.
+    const prevUnits = editingClient ? (unitsByClient.get(editingClient.id) ?? []) : [];
+
     if (editingClient) {
       const { error: err } = await supabase.from("clients").update(clientPayload).eq("id", editingClient.id);
       if (err) {
@@ -221,16 +228,22 @@ export default function ClientesPage() {
       clientId = inserted.id;
     }
 
-    const unitRows = formUnits.map((u) => ({
-      client_id: clientId,
-      unit_code: u.unit_code,
-      plan: u.plan.trim() || null,
-      status: u.status,
-      progress: Math.max(0, Math.min(100, Number(u.progress) || 0)),
-      access_url: u.access_url.trim() || null,
-      access_user: u.access_user.trim() || null,
-      access_password: u.access_password.trim() || null,
-    }));
+    // Carry over provisioned_at when the access_user didn't change.
+    const unitRows = formUnits.map((u) => {
+      const prev = prevUnits.find((p) => p.unit_code === u.unit_code);
+      const sameUser = prev?.access_user === u.access_user.trim() && !!u.access_user.trim();
+      return {
+        client_id: clientId,
+        unit_code: u.unit_code,
+        plan: u.plan.trim() || null,
+        status: u.status,
+        progress: Math.max(0, Math.min(100, Number(u.progress) || 0)),
+        access_url: u.access_url.trim() || null,
+        access_user: u.access_user.trim() || null,
+        access_password: u.access_password.trim() || null,
+        provisioned_at: sameUser ? (prev?.provisioned_at ?? null) : null,
+      };
+    });
 
     if (unitRows.length > 0) {
       const { error: err } = await supabase.from("client_units").insert(unitRows);
@@ -241,7 +254,48 @@ export default function ClientesPage() {
       }
     }
 
+    // Provision admin users for provisionable nodos with new or changed credentials.
+    const provisionErrors: string[] = [];
+    for (const u of formUnits) {
+      const nodeDef = NODES.find((n) => n.code === u.unit_code);
+      if (!nodeDef?.provisionable) continue;
+      if (!u.access_user.trim() || !u.access_password.trim()) continue;
+      if (u.status !== "activo") continue;
+
+      const prev = prevUnits.find((p) => p.unit_code === u.unit_code);
+      const alreadyProvisioned =
+        prev?.provisioned_at && prev.access_user === u.access_user.trim();
+      if (alreadyProvisioned) continue;
+
+      const res = await fetch("/api/nodo-provision", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nodo_code: u.unit_code,
+          client_name: formName.trim(),
+          email: u.access_user.trim(),
+          password: u.access_password.trim(),
+          plan: u.plan.trim(),
+        }),
+      });
+      const json = await res.json();
+      if (json.ok) {
+        await supabase
+          .from("client_units")
+          .update({ provisioned_at: new Date().toISOString() })
+          .eq("client_id", clientId)
+          .eq("unit_code", u.unit_code);
+      } else {
+        provisionErrors.push(`${nodeDef.label}: ${json.error ?? "error desconocido"}`);
+      }
+    }
+
     setSaving(false);
+    if (provisionErrors.length > 0) {
+      setError("Cliente guardado. Error al crear accesos: " + provisionErrors.join("; "));
+      loadAll();
+      return;
+    }
     setShowForm(false);
     loadAll();
   }
@@ -479,7 +533,14 @@ export default function ClientesPage() {
                                       <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 14, color: "var(--color-navy)" }}>
                                         nodo | {u.unit_code}
                                       </span>
-                                      <span style={{ fontSize: 11.5, fontWeight: 700, background: st.bg, color: st.color, borderRadius: 999, padding: "2px 9px" }}>{st.label}</span>
+                                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                        {u.provisioned_at && (
+                                          <span style={{ fontSize: 11, fontWeight: 700, background: "#E1F0E8", color: "#1F8A5B", borderRadius: 999, padding: "2px 8px" }}>
+                                            Acceso activo
+                                          </span>
+                                        )}
+                                        <span style={{ fontSize: 11.5, fontWeight: 700, background: st.bg, color: st.color, borderRadius: 999, padding: "2px 9px" }}>{st.label}</span>
+                                      </div>
                                     </div>
                                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
                                       <span style={{ fontSize: 12.5, color: "var(--color-slate2)" }}>Plan: <strong style={{ color: "var(--color-ink)" }}>{u.plan ?? "—"}</strong></span>
@@ -620,7 +681,7 @@ export default function ClientesPage() {
                         </div>
                         <div style={{ display: "flex", gap: 10 }}>
                           <div style={{ flex: 1 }}>
-                            <label style={labelStyle}>Usuario</label>
+                            <label style={labelStyle}>Usuario (email)</label>
                             <input type="text" value={u.access_user} onChange={(e) => updateFormUnit(u.key, { access_user: e.target.value })} style={inputStyle} autoComplete="off" />
                           </div>
                           <div style={{ flex: 1 }}>
@@ -628,6 +689,24 @@ export default function ClientesPage() {
                             <input type="text" value={u.access_password} onChange={(e) => updateFormUnit(u.key, { access_password: e.target.value })} style={inputStyle} autoComplete="off" />
                           </div>
                         </div>
+                        {(() => {
+                          const nodeDef = NODES.find((n) => n.code === u.unit_code);
+                          if (!nodeDef?.provisionable) return null;
+                          if (!u.access_user.trim() || !u.access_password.trim()) return null;
+                          if (u.status !== "activo") return null;
+                          if (u.provisioned_at) {
+                            return (
+                              <p style={{ margin: "8px 0 0", fontSize: 11.5, color: "#1F8A5B", fontWeight: 600 }}>
+                                ✓ Acceso ya creado en {nodeDef.label}
+                              </p>
+                            );
+                          }
+                          return (
+                            <p style={{ margin: "8px 0 0", fontSize: 11.5, color: "#2A6FDB", fontWeight: 500 }}>
+                              Al guardar se creará el acceso de administrador en {nodeDef.label}.
+                            </p>
+                          );
+                        })()}
                       </div>
                     ))}
                   </div>

@@ -29,6 +29,8 @@ export interface NodeDef {
   intro?: string;
   /** Example feature cards shown below the intro. */
   highlights?: NodeHighlight[];
+  /** Whether NodoCore can auto-provision an admin user in this nodo's Supabase. */
+  provisionable?: boolean;
 }
 
 export const NODES: NodeDef[] = [
@@ -36,6 +38,7 @@ export const NODES: NodeDef[] = [
     code: "Inmo",
     slug: "inmo",
     label: "Nodo Inmo",
+    provisionable: true,
     description:
       "Gestión inmobiliaria de nueva generación, con respaldo de martilleros públicos.",
     Icon: Building2,
