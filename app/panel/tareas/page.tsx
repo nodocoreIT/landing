@@ -16,20 +16,15 @@ export default function TareasPage() {
     async function load() {
       const supabase = createClient();
 
-      const [{ data: tasksData }, { data: profilesData }] = await Promise.all([
+      const [{ data: tasksData }, { data: profilesData }, { data: unitsData }] = await Promise.all([
         supabase.from("tasks").select("*").order("position"),
-        // select("*") stays safe whether or not avatar_url exists yet.
         supabase.from("profiles").select("*"),
+        supabase.from("units").select("code, name").order("sort"),
       ]);
 
-      const taskList = (tasksData ?? []) as Task[];
-      const profileList = (profilesData ?? []) as Profile[];
-
-      const unitSet = new Set(taskList.map((t) => t.unit_code).filter(Boolean));
-
-      setTasks(taskList);
-      setProfiles(profileList);
-      setUnits(unitSet.size > 0 ? Array.from(unitSet) : ["Core", "IA", "Diseño", "Infra"]);
+      setTasks((tasksData ?? []) as Task[]);
+      setProfiles((profilesData ?? []) as Profile[]);
+      setUnits((unitsData ?? []).map((u: { code: string; name: string }) => u.code));
       setLoading(false);
     }
 

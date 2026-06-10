@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { Bug, CheckSquare, Lightbulb } from "lucide-react";
 import {
   DndContext,
   DragEndEvent,
@@ -8,6 +9,7 @@ import {
   DragStartEvent,
   DragOverlay,
   PointerSensor,
+  useDroppable,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -29,6 +31,7 @@ export type Task = {
   unit_code: string;
   status: "backlog" | "doing" | "review" | "done";
   priority: "alta" | "media" | "baja";
+  type: "task" | "bug" | "idea";
   assignee: string | null;
   due_date: string | null;
   position: number;
@@ -65,6 +68,12 @@ const PRIORITY_STYLES: Record<
   alta: { bg: "#FBE6E1", color: "#C0392B", label: "Alta" },
   media: { bg: "#FCE9D8", color: "#B5630C", label: "Media" },
   baja: { bg: "var(--color-mist)", color: "var(--color-slate2)", label: "Baja" },
+};
+
+const TYPE_CONFIG: Record<Task["type"], { label: string; color: string; bg: string; Icon: React.ElementType }> = {
+  task: { label: "Tarea",  color: "#2A6FDB", bg: "#E3EDFC", Icon: CheckSquare },
+  bug:  { label: "Bug",    color: "#C0392B", bg: "#FBE6E1", Icon: Bug },
+  idea: { label: "Idea",   color: "#B5630C", bg: "#FCE9D8", Icon: Lightbulb },
 };
 
 const MONTH_NAMES = [
@@ -186,6 +195,7 @@ function TaskEditModal({
   const [description, setDescription] = useState(task.description ?? "");
   const [unitCode, setUnitCode] = useState(task.unit_code);
   const [priority, setPriority] = useState<Task["priority"]>(task.priority);
+  const [type, setType] = useState<Task["type"]>(task.type ?? "task");
   const [dueDate, setDueDate] = useState(task.due_date ?? "");
   const [assignee, setAssignee] = useState(task.assignee ?? "");
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -224,6 +234,7 @@ function TaskEditModal({
       description: description.trim() || null,
       unit_code: unitCode,
       priority,
+      type,
       due_date: dueDate || null,
       assignee: assignee || null,
     };
@@ -319,7 +330,7 @@ function TaskEditModal({
             />
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
             <div>
               <label style={labelStyle}>Unidad</label>
               <select
@@ -343,6 +354,19 @@ function TaskEditModal({
                 <option value="alta">Alta</option>
                 <option value="media">Media</option>
                 <option value="baja">Baja</option>
+              </select>
+            </div>
+
+            <div>
+              <label style={labelStyle}>Tipo</label>
+              <select
+                value={type}
+                onChange={(e) => setType(e.target.value as Task["type"])}
+                style={inputStyle}
+              >
+                <option value="task">Tarea</option>
+                <option value="bug">Bug</option>
+                <option value="idea">Idea</option>
               </select>
             </div>
           </div>
@@ -502,6 +526,8 @@ function TaskCard({
 }) {
   const assignee = profiles.find((p) => p.id === task.assignee);
   const priority = PRIORITY_STYLES[task.priority];
+  const typeConf = TYPE_CONFIG[task.type ?? "task"];
+  const TypeIcon = typeConf.Icon;
 
   return (
     <div
@@ -542,6 +568,23 @@ function TaskCard({
           }}
         >
           {priority.label}
+        </span>
+        <span
+          title={typeConf.label}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 22,
+            height: 22,
+            borderRadius: 6,
+            background: typeConf.bg,
+            color: typeConf.color,
+            marginLeft: "auto",
+            flexShrink: 0,
+          }}
+        >
+          <TypeIcon size={13} strokeWidth={2.2} />
         </span>
       </div>
 
@@ -653,10 +696,11 @@ function AddTaskForm({
   const [title, setTitle] = useState("");
   const [unit, setUnit] = useState(units[0] ?? "");
   const [priority, setPriority] = useState<Task["priority"]>("media");
+  const [type, setType] = useState<Task["type"]>("task");
 
   function handleSubmit() {
     if (!title.trim()) return;
-    onAdd({ title: title.trim(), description: null, unit_code: unit, status, priority, assignee: null, due_date: null });
+    onAdd({ title: title.trim(), description: null, unit_code: unit, status, priority, type, assignee: null, due_date: null });
   }
 
   return (
@@ -693,6 +737,15 @@ function AddTaskForm({
           <option value="alta">Alta</option>
           <option value="media">Media</option>
           <option value="baja">Baja</option>
+        </select>
+        <select
+          value={type}
+          onChange={(e) => setType(e.target.value as Task["type"])}
+          style={{ flex: 1, border: "1px solid var(--color-mist)", borderRadius: 6, padding: "5px 8px", fontSize: 12.5, fontFamily: "var(--font-sans)", outline: "none" }}
+        >
+          <option value="task">Tarea</option>
+          <option value="bug">Bug</option>
+          <option value="idea">Idea</option>
         </select>
       </div>
       <div style={{ display: "flex", gap: 6 }}>
@@ -733,9 +786,11 @@ function KanbanColumn({
   onEditTask: (task: Task) => void;
 }) {
   const [showForm, setShowForm] = useState(false);
+  const { setNodeRef: setDropRef } = useDroppable({ id: column.id });
 
   return (
     <div
+      ref={setDropRef}
       style={{
         background: isOver ? "#E2EBF4" : "#EEF3F8",
         border: "1px solid var(--color-mist)",
@@ -803,78 +858,98 @@ function KanbanColumn({
   );
 }
 
-// ─── AssigneeFilterBar (Jira-style assignee filter) ──────────────────────────
+// ─── FilterBar ────────────────────────────────────────────────────────────────
 
-function AssigneeFilterBar({
+function FilterBar({
   profiles,
-  selected,
-  onToggle,
-  onClear,
+  units,
+  selectedAssignees,
+  selectedUnits,
+  selectedTypes,
+  onToggleAssignee,
+  onToggleUnit,
+  onToggleType,
+  onClearAll,
 }: {
   profiles: Profile[];
-  selected: string[];
-  onToggle: (id: string) => void;
-  onClear: () => void;
+  units: string[];
+  selectedAssignees: string[];
+  selectedUnits: string[];
+  selectedTypes: Task["type"][];
+  onToggleAssignee: (id: string) => void;
+  onToggleUnit: (unit: string) => void;
+  onToggleType: (type: Task["type"]) => void;
+  onClearAll: () => void;
 }) {
-  if (profiles.length === 0) return null;
+  const hasFilters = selectedAssignees.length > 0 || selectedUnits.length > 0 || selectedTypes.length > 0;
+
+  const chipBase: React.CSSProperties = {
+    border: "1px solid var(--color-mist)",
+    borderRadius: 999,
+    padding: "4px 12px",
+    fontSize: 12.5,
+    fontWeight: 600,
+    cursor: "pointer",
+    fontFamily: "var(--font-sans)",
+    transition: "background 150ms, color 150ms, border-color 150ms",
+  };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 12,
-        marginBottom: 20,
-        flexWrap: "wrap",
-      }}
-    >
-      <span style={{ fontSize: 13, fontWeight: 600, color: "var(--color-slate2)" }}>
-        Filtrar por responsable
-      </span>
-      <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
-        {profiles.map((p) => {
-          const active = selected.includes(p.id);
-          const dimmed = selected.length > 0 && !active;
+    <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 20 }}>
+      {/* Assignees */}
+      {profiles.length > 0 && (
+        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+          <span style={{ fontSize: 12, fontWeight: 700, color: "var(--color-slate2)", textTransform: "uppercase", letterSpacing: "0.05em", width: 90, flexShrink: 0 }}>Responsable</span>
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 6 }}>
+            {profiles.map((p) => {
+              const active = selectedAssignees.includes(p.id);
+              const dimmed = selectedAssignees.length > 0 && !active;
+              return (
+                <button key={p.id} type="button" onClick={() => onToggleAssignee(p.id)} title={p.full_name} aria-pressed={active}
+                  style={{ padding: 0, border: "none", background: "transparent", cursor: "pointer", opacity: dimmed ? 0.35 : 1, transform: active ? "translateY(-3px)" : "none", transition: "opacity 150ms, transform 150ms", borderRadius: 8 }}>
+                  <AssigneeAvatar profile={p} size={30} withInitials ring={active} />
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Units */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+        <span style={{ fontSize: 12, fontWeight: 700, color: "var(--color-slate2)", textTransform: "uppercase", letterSpacing: "0.05em", width: 90, flexShrink: 0 }}>Unidad</span>
+        {units.map((u) => {
+          const active = selectedUnits.includes(u);
           return (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => onToggle(p.id)}
-              title={p.full_name}
-              aria-pressed={active}
-              style={{
-                padding: 0,
-                border: "none",
-                background: "transparent",
-                cursor: "pointer",
-                opacity: dimmed ? 0.4 : 1,
-                transform: active ? "translateY(-3px)" : "none",
-                transition: "opacity 150ms, transform 150ms",
-                borderRadius: 8,
-              }}
-            >
-              <AssigneeAvatar profile={p} size={32} withInitials ring={active} />
+            <button key={u} onClick={() => onToggleUnit(u)} style={{ ...chipBase, background: active ? "var(--color-navy)" : "white", color: active ? "white" : "var(--color-slate2)", borderColor: active ? "var(--color-navy)" : "var(--color-mist)" }}>
+              {u}
             </button>
           );
         })}
       </div>
-      {selected.length > 0 && (
-        <button
-          onClick={onClear}
-          style={{
-            background: "transparent",
-            border: "1px solid var(--color-mist)",
-            borderRadius: 999,
-            padding: "5px 12px",
-            fontSize: 12.5,
-            fontWeight: 600,
-            color: "var(--color-slate2)",
-            cursor: "pointer",
-            fontFamily: "var(--font-sans)",
-          }}
-        >
-          Limpiar filtro
-        </button>
+
+      {/* Types */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+        <span style={{ fontSize: 12, fontWeight: 700, color: "var(--color-slate2)", textTransform: "uppercase", letterSpacing: "0.05em", width: 90, flexShrink: 0 }}>Tipo</span>
+        {(Object.entries(TYPE_CONFIG) as [Task["type"], (typeof TYPE_CONFIG)[Task["type"]]][]).map(([key, conf]) => {
+          const active = selectedTypes.includes(key);
+          const Icon = conf.Icon;
+          return (
+            <button key={key} onClick={() => onToggleType(key)}
+              style={{ ...chipBase, display: "inline-flex", alignItems: "center", gap: 5, background: active ? conf.bg : "white", color: active ? conf.color : "var(--color-slate2)", borderColor: active ? conf.color : "var(--color-mist)" }}>
+              <Icon size={13} strokeWidth={2.2} />
+              {conf.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {hasFilters && (
+        <div>
+          <button onClick={onClearAll} style={{ ...chipBase, background: "transparent", color: "var(--color-slate2)" }}>
+            Limpiar filtros
+          </button>
+        </div>
       )}
     </div>
   );
@@ -893,11 +968,22 @@ export default function KanbanBoard({
   const [overColumnId, setOverColumnId] = useState<Task["status"] | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [assigneeFilter, setAssigneeFilter] = useState<string[]>([]);
+  const [unitFilter, setUnitFilter] = useState<string[]>([]);
+  const [typeFilter, setTypeFilter] = useState<Task["type"][]>([]);
 
   function toggleAssignee(id: string) {
-    setAssigneeFilter((prev) =>
-      prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]
-    );
+    setAssigneeFilter((prev) => prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]);
+  }
+  function toggleUnit(unit: string) {
+    setUnitFilter((prev) => prev.includes(unit) ? prev.filter((u) => u !== unit) : [...prev, unit]);
+  }
+  function toggleType(type: Task["type"]) {
+    setTypeFilter((prev) => prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]);
+  }
+  function clearAllFilters() {
+    setAssigneeFilter([]);
+    setUnitFilter([]);
+    setTypeFilter([]);
   }
 
   const supabase = createClient();
@@ -914,7 +1000,11 @@ export default function KanbanBoard({
     const matchesAssignee =
       assigneeFilter.length === 0 ||
       (t.assignee !== null && assigneeFilter.includes(t.assignee));
-    return matchesSearch && matchesAssignee;
+    const matchesUnit =
+      unitFilter.length === 0 || unitFilter.includes(t.unit_code);
+    const matchesType =
+      typeFilter.length === 0 || typeFilter.includes(t.type ?? "task");
+    return matchesSearch && matchesAssignee && matchesUnit && matchesType;
   });
 
   function getColumnTasks(status: Task["status"]) {
@@ -1023,6 +1113,7 @@ export default function KanbanBoard({
         description: updated.description,
         unit_code: updated.unit_code,
         priority: updated.priority,
+        type: updated.type,
         due_date: updated.due_date,
         assignee: updated.assignee,
       })
@@ -1127,11 +1218,16 @@ export default function KanbanBoard({
         ))}
       </div>
 
-      <AssigneeFilterBar
+      <FilterBar
         profiles={profiles}
-        selected={assigneeFilter}
-        onToggle={toggleAssignee}
-        onClear={() => setAssigneeFilter([])}
+        units={units}
+        selectedAssignees={assigneeFilter}
+        selectedUnits={unitFilter}
+        selectedTypes={typeFilter}
+        onToggleAssignee={toggleAssignee}
+        onToggleUnit={toggleUnit}
+        onToggleType={toggleType}
+        onClearAll={clearAllFilters}
       />
 
       <DndContext

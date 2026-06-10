@@ -28,6 +28,7 @@ type ClientUnit = {
   access_user: string | null;
   access_password: string | null;
   provisioned_at: string | null;
+  provision_user_id: string | null;
 };
 
 // Local form representation of a nodo (with a stable key for React lists).
@@ -41,6 +42,7 @@ type FormUnit = {
   access_user: string;
   access_password: string;
   provisioned_at: string | null;
+  provision_user_id: string | null;
 };
 
 const STATUS_STYLES: Record<ClientStatus, { bg: string; color: string; label: string }> = {
@@ -70,6 +72,7 @@ function newFormUnit(): FormUnit {
     access_user: "",
     access_password: "",
     provisioned_at: null,
+    provision_user_id: null,
   };
 }
 
@@ -168,6 +171,7 @@ export default function ClientesPage() {
             access_user: u.access_user ?? "",
             access_password: u.access_password ?? "",
             provisioned_at: u.provisioned_at ?? null,
+            provision_user_id: u.provision_user_id ?? null,
           }))
         : [newFormUnit()]
     );
@@ -228,7 +232,7 @@ export default function ClientesPage() {
       clientId = inserted.id;
     }
 
-    // Carry over provisioned_at when the access_user didn't change.
+    // Carry over provisioned_at and provision_user_id when the access_user didn't change.
     const unitRows = formUnits.map((u) => {
       const prev = prevUnits.find((p) => p.unit_code === u.unit_code);
       const sameUser = prev?.access_user === u.access_user.trim() && !!u.access_user.trim();
@@ -242,6 +246,7 @@ export default function ClientesPage() {
         access_user: u.access_user.trim() || null,
         access_password: u.access_password.trim() || null,
         provisioned_at: sameUser ? (prev?.provisioned_at ?? null) : null,
+        provision_user_id: sameUser ? (prev?.provision_user_id ?? null) : null,
       };
     });
 
@@ -254,17 +259,22 @@ export default function ClientesPage() {
       }
     }
 
-    // Provision admin users for provisionable nodos with new or changed credentials.
+    // Map unit_code → nodo-user-id for suspend/reactivate (existing + newly provisioned).
+    const provisionedUserIds = new Map<string, string>();
+    for (const u of formUnits) {
+      if (u.provision_user_id) provisionedUserIds.set(u.unit_code, u.provision_user_id);
+    }
+
+    // Provision admin users for onboarding/activo nodos with new or changed credentials.
     const provisionErrors: string[] = [];
     for (const u of formUnits) {
       const nodeDef = NODES.find((n) => n.code === u.unit_code);
       if (!nodeDef?.provisionable) continue;
       if (!u.access_user.trim() || !u.access_password.trim()) continue;
-      if (u.status !== "activo") continue;
+      if (u.status === "pausado") continue;
 
       const prev = prevUnits.find((p) => p.unit_code === u.unit_code);
-      const alreadyProvisioned =
-        prev?.provisioned_at && prev.access_user === u.access_user.trim();
+      const alreadyProvisioned = prev?.provisioned_at && prev.access_user === u.access_user.trim();
       if (alreadyProvisioned) continue;
 
       const res = await fetch("/api/nodo-provision", {
@@ -280,14 +290,33 @@ export default function ClientesPage() {
       });
       const json = await res.json();
       if (json.ok) {
+        const userId = json.user_id as string | undefined;
+        if (userId) provisionedUserIds.set(u.unit_code, userId);
         await supabase
           .from("client_units")
-          .update({ provisioned_at: new Date().toISOString() })
+          .update({ provisioned_at: new Date().toISOString(), provision_user_id: userId ?? null })
           .eq("client_id", clientId)
           .eq("unit_code", u.unit_code);
       } else {
         provisionErrors.push(`${nodeDef.label}: ${json.error ?? "error desconocido"}`);
       }
+    }
+
+    // Sync ban status: pausado → ban, onboarding/activo → unban.
+    for (const u of formUnits) {
+      const nodeDef = NODES.find((n) => n.code === u.unit_code);
+      if (!nodeDef?.provisionable) continue;
+      const userId = provisionedUserIds.get(u.unit_code);
+      if (!userId) continue;
+      await fetch("/api/nodo-suspend", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nodo_code: u.unit_code,
+          user_id: userId,
+          action: u.status === "pausado" ? "suspend" : "reactivate",
+        }),
+      });
     }
 
     setSaving(false);
