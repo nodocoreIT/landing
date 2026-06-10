@@ -5,6 +5,7 @@ import { Pencil, Trash2, ChevronDown, ChevronRight, Eye, EyeOff, Copy, Plus } fr
 import Topbar from "@/components/panel/Topbar";
 import { createClient } from "@/lib/supabase/client";
 import { NODES } from "@/lib/nodes";
+import { NODO_PLANS } from "@/lib/nodo-plans";
 
 type ClientStatus = "activo" | "onboarding" | "pausado";
 
@@ -315,6 +316,23 @@ export default function ClientesPage() {
           nodo_code: u.unit_code,
           user_id: userId,
           action: u.status === "pausado" ? "suspend" : "reactivate",
+        }),
+      });
+    }
+
+    // Sync plan tier in nodo app_metadata when plan field has a value.
+    for (const u of formUnits) {
+      const nodeDef = NODES.find((n) => n.code === u.unit_code);
+      if (!nodeDef?.provisionable) continue;
+      const userId = provisionedUserIds.get(u.unit_code);
+      if (!userId || !u.plan) continue;
+      await fetch("/api/nodo-plan-update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nodo_code: u.unit_code,
+          user_id: userId,
+          plan: u.plan,
         }),
       });
     }
@@ -676,13 +694,38 @@ export default function ClientesPage() {
                         <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
                           <div style={{ flex: 1 }}>
                             <label style={labelStyle}>Módulo</label>
-                            <select value={u.unit_code} onChange={(e) => updateFormUnit(u.key, { unit_code: e.target.value })} style={inputStyle}>
+                            <select
+                              value={u.unit_code}
+                              onChange={(e) => {
+                                const newCode = e.target.value;
+                                const nodePlans = NODO_PLANS.find((n) => n.slug === newCode.toLowerCase());
+                                const firstPlan = nodePlans?.plans ? Object.keys(nodePlans.plans)[0] : "";
+                                updateFormUnit(u.key, { unit_code: newCode, plan: firstPlan });
+                              }}
+                              style={inputStyle}
+                            >
                               {NODES.map((n) => <option key={n.code} value={n.code}>{n.label}</option>)}
                             </select>
                           </div>
                           <div style={{ flex: 1 }}>
                             <label style={labelStyle}>Plan</label>
-                            <input type="text" value={u.plan} onChange={(e) => updateFormUnit(u.key, { plan: e.target.value })} style={inputStyle} placeholder="Starter, Pro..." />
+                            {(() => {
+                              const nodePlans = NODO_PLANS.find((n) => n.slug === u.unit_code.toLowerCase());
+                              if (nodePlans?.plans) {
+                                return (
+                                  <select value={u.plan} onChange={(e) => updateFormUnit(u.key, { plan: e.target.value })} style={inputStyle}>
+                                    {Object.entries(nodePlans.plans).map(([tier, pricing]) => (
+                                      <option key={tier} value={tier}>
+                                        {tier.charAt(0).toUpperCase() + tier.slice(1)} — {pricing.currency} {pricing.monthly}/mes
+                                      </option>
+                                    ))}
+                                  </select>
+                                );
+                              }
+                              return (
+                                <input type="text" value={u.plan} onChange={(e) => updateFormUnit(u.key, { plan: e.target.value })} style={inputStyle} placeholder="Plan..." />
+                              );
+                            })()}
                           </div>
                         </div>
 

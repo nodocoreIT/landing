@@ -63,6 +63,7 @@ export async function POST(request: Request) {
     password,
     email_confirm: true,
     user_metadata: { full_name: clientName || email },
+    app_metadata: { plan: planToTier(plan) },
   });
 
   if (createErr) {

@@ -5,15 +5,15 @@ import { X } from "lucide-react";
 type TopbarProps = {
   breadcrumb: string;
   title: string;
-  searchValue: string;
-  onSearchChange: (value: string) => void;
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
   searchPlaceholder?: string;
 };
 
 export default function Topbar({
   breadcrumb,
   title,
-  searchValue,
+  searchValue = "",
   onSearchChange,
   searchPlaceholder = "Buscar...",
 }: TopbarProps) {
@@ -54,6 +54,7 @@ export default function Topbar({
           {title}
         </h1>
       </div>
+      {onSearchChange !== undefined && (
       <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
         <input
           type="text"
@@ -84,7 +85,7 @@ export default function Topbar({
         {searchValue && (
           <button
             type="button"
-            onClick={() => onSearchChange("")}
+            onClick={() => onSearchChange!("")}
             aria-label="Limpiar búsqueda"
             title="Limpiar"
             style={{
@@ -107,6 +108,7 @@ export default function Topbar({
           </button>
         )}
       </div>
+      )}
     </div>
   );
 }

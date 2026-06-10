@@ -12,6 +12,7 @@ type NavItem = {
   label: string;
   href: string;
   count?: number;
+  enabled?: boolean;
 };
 
 type SidebarProps = {
@@ -39,9 +40,9 @@ const PLATFORM_ITEMS: NavItem[] = [
 ];
 
 const ECOSYSTEM_ITEMS: NavItem[] = [
-  { label: "Unidades", href: "/panel/unidades" },
-  { label: "Informes", href: "/panel/informes" },
-  { label: "Ajustes", href: "/panel/ajustes" },
+  { label: "Unidades", href: "/panel/unidades", enabled: true },
+  { label: "Informes", href: "/panel/informes", enabled: false },
+  { label: "Ajustes", href: "/panel/ajustes", enabled: false },
 ];
 
 export default function Sidebar({
@@ -196,24 +197,62 @@ export default function Sidebar({
             >
               Ecosistema
             </p>
-            {ECOSYSTEM_ITEMS.map((item) => (
-              <div
-                key={item.href}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "8px 10px",
-                  borderRadius: 8,
-                  marginBottom: 2,
-                  fontSize: 14,
-                  fontWeight: 600,
-                  color: "rgba(234,240,247,.4)",
-                  cursor: "default",
-                }}
-              >
-                {item.label}
-              </div>
-            ))}
+            {ECOSYSTEM_ITEMS.map((item) => {
+              const active = isActive(item.href);
+              if (item.enabled) {
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "8px 10px",
+                      borderRadius: 8,
+                      marginBottom: 2,
+                      textDecoration: "none",
+                      fontSize: 14,
+                      fontWeight: 600,
+                      color: active ? "white" : "rgba(234,240,247,.72)",
+                      background: active ? "var(--color-brand)" : "transparent",
+                      boxShadow: active ? "0 6px 16px rgba(218,90,14,.3)" : "none",
+                      transition: "background 150ms, color 150ms",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!active) {
+                        (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,.06)";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!active) {
+                        (e.currentTarget as HTMLElement).style.background = "transparent";
+                      }
+                    }}
+                  >
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              }
+              return (
+                <div
+                  key={item.href}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "8px 10px",
+                    borderRadius: 8,
+                    marginBottom: 2,
+                    fontSize: 14,
+                    fontWeight: 600,
+                    color: "rgba(234,240,247,.4)",
+                    cursor: "default",
+                  }}
+                >
+                  {item.label}
+                </div>
+              );
+            })}
           </div>
         </nav>
 
