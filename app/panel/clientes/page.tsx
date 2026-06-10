@@ -275,7 +275,13 @@ export default function ClientesPage() {
       if (u.status === "pausado") continue;
 
       const prev = prevUnits.find((p) => p.unit_code === u.unit_code);
-      const alreadyProvisioned = prev?.provisioned_at && prev.access_user === u.access_user.trim();
+      // Skip only when already provisioned AND user_id is already stored.
+      // If user_id is missing (column was added after provisioning), re-call
+      // provision so the route recovers and returns the existing user_id.
+      const alreadyProvisioned =
+        !!prev?.provisioned_at &&
+        prev.access_user === u.access_user.trim() &&
+        !!prev.provision_user_id;
       if (alreadyProvisioned) continue;
 
       const res = await fetch("/api/nodo-provision", {

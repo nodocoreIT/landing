@@ -68,9 +68,11 @@ export async function POST(request: Request) {
 
   if (createErr) {
     const msg = createErr.message ?? "";
-    // User already exists — treat as success so saves are idempotent
     if (msg.toLowerCase().includes("already")) {
-      return Response.json({ ok: true, existing: true });
+      // User exists — look them up to recover the user_id so callers can store it
+      const { data: list } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+      const found = list?.users?.find((u) => u.email === email);
+      return Response.json({ ok: true, existing: true, user_id: found?.id ?? null });
     }
     return Response.json({ error: msg }, { status: 400 });
   }
