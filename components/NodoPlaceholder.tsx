@@ -109,31 +109,42 @@ export default function NodoPlaceholder({ slug }: { slug: string }) {
             )}
 
             <div className="mt-10 flex flex-col items-center gap-4">
-              {/* Row 1 */}
-              <div className="flex flex-wrap items-center justify-center gap-4">
+              {slug === "inmo" ? (
                 <Link
-                  href="https://nodoinmo.vercel.app/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center px-7 py-3.5 text-[16px] font-semibold rounded-md bg-brand text-white hover:bg-brand-600 active:scale-[.98] transition-all duration-150"
+                  href="/login?node=inmo"
+                  className="inline-flex items-center justify-center px-8 py-4 text-[16px] font-bold rounded-md bg-brand text-white hover:bg-brand-600 active:scale-[.98] transition-all duration-150 shadow-md shadow-brand/15"
                 >
-                  Ver Demo
+                  Entrar a Inmo
                 </Link>
-                <Link
-                  href="/"
-                  className="btn-ghost-light inline-flex items-center justify-center px-7 py-3.5 text-[16px] font-semibold rounded-md text-white"
-                >
-                  Volver al inicio
-                </Link>
-              </div>
+              ) : (
+                <>
+                  {/* Row 1 */}
+                  <div className="flex flex-wrap items-center justify-center gap-4">
+                    <Link
+                      href="https://nodoinmo.vercel.app/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center px-7 py-3.5 text-[16px] font-semibold rounded-md bg-brand text-white hover:bg-brand-600 active:scale-[.98] transition-all duration-150"
+                    >
+                      Ver Demo
+                    </Link>
+                    <Link
+                      href="/"
+                      className="btn-ghost-light inline-flex items-center justify-center px-7 py-3.5 text-[16px] font-semibold rounded-md text-white"
+                    >
+                      Volver al inicio
+                    </Link>
+                  </div>
 
-              {/* Row 2 */}
-              <button
-                onClick={() => setPdfOpen(true)}
-                className="btn-ghost-light inline-flex items-center justify-center px-7 py-3.5 text-[16px] font-semibold rounded-md text-white"
-              >
-                Ver Precios
-              </button>
+                  {/* Row 2 */}
+                  <button
+                    onClick={() => setPdfOpen(true)}
+                    className="btn-ghost-light inline-flex items-center justify-center px-7 py-3.5 text-[16px] font-semibold rounded-md text-white"
+                  >
+                    Ver Precios
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </section>

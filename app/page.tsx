@@ -135,8 +135,10 @@ function HeroSection() {
           />
         </RevealOnScroll>
 
+        {/* TODO VEER SI VUELAN O NO ESTAS LINEAS */}
+
         {/* CTAs */}
-        <RevealOnScroll delay={320}>
+        {/* <RevealOnScroll delay={320}>
           <div className="flex flex-wrap items-center justify-center gap-4 mt-10">
             <a
               href="#contacto"
@@ -151,10 +153,9 @@ function HeroSection() {
               Conocer el ecosistema
             </a>
           </div>
-        </RevealOnScroll>
+        </RevealOnScroll> */}
 
-        {/* Pills */}
-        <RevealOnScroll delay={400}>
+        {/* Pill {/* <RevealOnScroll delay={400}>
           <div className="flex flex-wrap items-center justify-center gap-2 mt-8">
             {PILLS.map((pill) => (
               <span
@@ -173,7 +174,7 @@ function HeroSection() {
               </span>
             ))}
           </div>
-        </RevealOnScroll>
+        </RevealOnScroll>s */}
       </div>
     </section>
   );
@@ -218,8 +219,7 @@ function FilosofiaSection() {
                 borderLeft: "2px solid var(--color-brand)",
               }}
             >
-              Un{" "}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
+              Un {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/logos/nodo%20nar.png"
                 alt="nodo"

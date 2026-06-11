@@ -31,6 +31,8 @@ export interface NodeDef {
   highlights?: NodeHighlight[];
   /** Whether NodoCore can auto-provision an admin user in this nodo's Supabase. */
   provisionable?: boolean;
+  /** Whether the node is currently in development. */
+  inDevelopment?: boolean;
 }
 
 export const NODES: NodeDef[] = [
@@ -39,6 +41,7 @@ export const NODES: NodeDef[] = [
     slug: "inmo",
     label: "Nodo Inmo",
     provisionable: true,
+    inDevelopment: false,
     description:
       "Gestión inmobiliaria de nueva generación, con respaldo de martilleros públicos.",
     Icon: Building2,
@@ -66,6 +69,7 @@ export const NODES: NodeDef[] = [
     code: "Obra",
     slug: "obra",
     label: "Nodo Obra",
+    inDevelopment: true,
     description:
       "Administración de proyectos constructivos: avances, gastos, registros y pagos.",
     Icon: HardHat,
@@ -93,6 +97,7 @@ export const NODES: NodeDef[] = [
     code: "Capital",
     slug: "capital",
     label: "Nodo Capital",
+    inDevelopment: true,
     description:
       "División financiera enfocada en la formación de grupos inversores.",
     Icon: Coins,
@@ -120,6 +125,7 @@ export const NODES: NodeDef[] = [
     code: "IT",
     slug: "it",
     label: "Nodo IT",
+    inDevelopment: true,
     description:
       "El motor tecnológico: software a medida e infraestructura corporativa.",
     Icon: Cpu,
@@ -147,6 +153,7 @@ export const NODES: NodeDef[] = [
     code: "Legal",
     slug: "legal",
     label: "Nodo Legal",
+    inDevelopment: true,
     description:
       "Asesoramiento jurídico integral, transversal a todas las áreas.",
     Icon: Scale,
@@ -174,6 +181,7 @@ export const NODES: NodeDef[] = [
     code: "Salud",
     slug: "salud",
     label: "Nodo Salud",
+    inDevelopment: false,
     description:
       "Inteligencia médica colaborativa: descentralización de historias clínicas y gestión digital para especialistas.",
     Icon: Stethoscope,
@@ -201,6 +209,7 @@ export const NODES: NodeDef[] = [
     code: "Agro",
     slug: "agro",
     label: "Nodo Agro",
+    inDevelopment: true,
     description:
       "Soluciones integrales para el sector productivo y los negocios rurales.",
     Icon: Wheat,
@@ -228,6 +237,7 @@ export const NODES: NodeDef[] = [
     code: "Contable",
     slug: "contable",
     label: "Nodo Contable",
+    inDevelopment: true,
     description:
       "Gestión contable e impositiva: balances, liquidaciones de impuestos y cumplimiento fiscal.",
     Icon: Calculator,

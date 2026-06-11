@@ -2,7 +2,14 @@
 
 import { Fragment, useState } from "react";
 import Link from "next/link";
-import { Stethoscope, Shield, ArrowRight, Sparkles, LayoutGrid, Heart } from "lucide-react";
+import {
+  Stethoscope,
+  Shield,
+  ArrowRight,
+  Sparkles,
+  LayoutGrid,
+  Heart,
+} from "lucide-react";
 import Navbar from "@/components/ui/Navbar";
 import Footer from "@/components/ui/Footer";
 import { getNodeBySlug } from "@/lib/nodes";
@@ -153,7 +160,8 @@ export default function Page() {
                 Submódulos de NODO | Salud
               </h2>
               <p className="text-slate2-300 max-w-xl mx-auto mt-4 text-[15px]">
-                Desglosamos la complejidad médica en herramientas digitales específicas y conectadas.
+                Desglosamos la complejidad médica en herramientas digitales
+                específicas y conectadas.
               </p>
             </div>
 
@@ -162,7 +170,8 @@ export default function Page() {
               <div
                 className="rounded-2xl p-8 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1"
                 style={{
-                  background: "linear-gradient(135deg, var(--color-navy-700), var(--color-navy))",
+                  background:
+                    "linear-gradient(135deg, var(--color-navy-700), var(--color-navy))",
                   border: "1px solid rgba(218, 90, 14, 0.25)",
                   boxShadow: "0 10px 30px -15px rgba(218, 90, 14, 0.15)",
                 }}
@@ -178,7 +187,9 @@ export default function Page() {
                     Disponible
                   </span>
                   <p className="text-[14.5px] leading-relaxed text-slate2-300 mb-6">
-                    Plataforma HealthTech para telemedicina profesional. Gestión de agenda, videoconsultas, historias clínicas y resúmenes SOAP asistidos por Inteligencia Artificial.
+                    Plataforma HealthTech para telemedicina profesional. Gestión
+                    de agenda, videoconsultas, historias clínicas y resúmenes
+                    SOAP asistidos por Inteligencia Artificial.
                   </p>
                 </div>
                 <Link
@@ -187,31 +198,6 @@ export default function Page() {
                 >
                   Acceder al módulo <ArrowRight className="h-4 w-4" />
                 </Link>
-              </div>
-
-              {/* Inactive Submodule: Consultorio Virtual */}
-              <div
-                className="rounded-2xl p-8 flex flex-col justify-between opacity-75"
-                style={{
-                  background: "var(--color-navy-700)",
-                  border: "1px solid rgba(255, 255, 255, 0.05)",
-                }}
-              >
-                <div>
-                  <div className="h-12 w-12 rounded-xl bg-white/5 text-slate2-300 flex items-center justify-center mb-6">
-                    <Stethoscope className="h-6 w-6" />
-                  </div>
-                  <h3 className="font-display font-bold text-white text-[20px] mb-3">
-                    Consultorio Virtual
-                  </h3>
-                  <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wider uppercase bg-white/5 text-white/50 border border-white/10 mb-4">
-                    Próximamente
-                  </span>
-                  <p className="text-[14.5px] leading-relaxed text-slate2-300/80 mb-6">
-                    Solución ágil para profesionales independientes: agenda simplificada, videollamadas directas y cobro integrado de consultas.
-                  </p>
-                </div>
-                <span className="text-[14px] text-white/45 font-medium">En desarrollo</span>
               </div>
 
               {/* Inactive Submodule: Proveedores */}
@@ -233,10 +219,14 @@ export default function Page() {
                     Próximamente
                   </span>
                   <p className="text-[14.5px] leading-relaxed text-slate2-300/80 mb-6">
-                    Ecosistema de negocios médicos: venta de prótesis, insumos clínicos y equipamiento con trazabilidad de transacciones y logística integrada.
+                    Ecosistema de negocios médicos: venta de prótesis, insumos
+                    clínicos y equipamiento con trazabilidad de transacciones y
+                    logística integrada.
                   </p>
                 </div>
-                <span className="text-[14px] text-white/45 font-medium">En desarrollo</span>
+                <span className="text-[14px] text-white/45 font-medium">
+                  En desarrollo
+                </span>
               </div>
             </div>
           </div>
@@ -270,9 +260,7 @@ export default function Page() {
                       border: "1px solid rgba(255,255,255,.1)",
                     }}
                   >
-                    <h3
-                      className="font-display font-bold text-brand-300 text-[17px] mb-3"
-                    >
+                    <h3 className="font-display font-bold text-brand-300 text-[17px] mb-3">
                       {h.title}
                     </h3>
                     <p

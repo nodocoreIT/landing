@@ -87,21 +87,6 @@ export default function Navbar() {
         </ul>
 
         {/* Right CTAs */}
-        <div className="flex items-center gap-3">
-          <Link
-            href="/#contacto"
-            onClick={(e) => handleSectionClick(e, "contacto")}
-            className="inline-flex items-center justify-center px-5 py-2.5 text-[14px] font-semibold rounded-md bg-brand text-white hover:bg-brand-600 transition-colors duration-150 border-none cursor-pointer"
-          >
-            Solicitar demo
-          </Link>
-          <Link
-            href="/login"
-            className="nav-access-btn inline-block text-[14px] font-semibold text-white/80 hover:text-white transition-colors duration-150 px-4 py-2 rounded-md border border-white/20 hover:border-white/40"
-          >
-            Login
-          </Link>
-        </div>
       </div>
     </nav>
   );

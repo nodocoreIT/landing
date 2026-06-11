@@ -65,7 +65,7 @@ export default function ClinicaVirtualPage() {
           <div className="relative max-w-6xl mx-auto px-4 sm:px-8">
             <div className="max-w-3xl">
               <p className="text-brand-300 text-xs sm:text-sm font-bold tracking-widest uppercase mb-4">
-                Plataforma Multi-Médico · HealthTech
+                Plataforma Multi-Médico · Clinica Virtual
               </p>
 
               <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight text-white">
@@ -85,12 +85,10 @@ export default function ClinicaVirtualPage() {
 
               <div className="flex flex-wrap gap-4 mt-8">
                 <Link
-                  href="https://nodo-clinica.fly.dev/login/paciente"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="/login?node=clinica-virtual"
                   className="inline-flex items-center justify-center px-6 py-3 text-sm font-bold rounded-lg bg-brand text-white hover:bg-brand-600 active:scale-[.98] transition-all duration-150 shadow-lg shadow-brand/20"
                 >
-                  Entrar a Clinica Virtual
+                  Entrar a Clínica Virtual
                 </Link>
               </div>
             </div>
@@ -253,9 +251,7 @@ export default function ClinicaVirtualPage() {
 
                 <div className="mt-8 pt-4">
                   <Link
-                    href="https://nodo-clinica.fly.dev/registro/paciente"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href="/login?node=clinica-virtual&mode=register&role=paciente"
                     className="inline-flex items-center gap-2 text-emerald-400 font-semibold hover:text-emerald-300 transition-colors"
                   >
                     Crear cuenta de paciente <ArrowRight className="h-4 w-4" />
@@ -307,9 +303,7 @@ export default function ClinicaVirtualPage() {
 
                 <div className="mt-8 pt-4">
                   <Link
-                    href="https://nodo-clinica.fly.dev/registro/medico"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href="/login?node=clinica-virtual&mode=register&role=medico"
                     className="inline-flex items-center gap-2 text-brand font-semibold hover:text-brand-300 transition-colors"
                   >
                     Registrarme como médico <ArrowRight className="h-4 w-4" />
