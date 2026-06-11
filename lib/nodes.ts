@@ -4,7 +4,7 @@ import {
   Coins,
   Cpu,
   Scale,
-  ShieldCheck,
+  Stethoscope,
   Wheat,
   Calculator,
   type LucideIcon,
@@ -170,33 +170,33 @@ export const NODES: NodeDef[] = [
       },
     ],
   },
-  // {
-  //   code: "Seguros",
-  //   slug: "seguros",
-  //   label: "Nodo Seguros",
-  //   description:
-  //     "Protección estratégica para blindar los activos del ecosistema.",
-  //   Icon: ShieldCheck,
-  //   intro:
-  //     "NODO Seguros está pensado para proteger lo que el ecosistema construye. Ofrecemos protección estratégica para blindar los activos gestionados por NODO: propiedades, obras, inversiones y más. Porque de nada sirve construir patrimonio si no está debidamente protegido. Con NODO Seguros, cada activo tiene su cobertura, pensada en función de la operación real de cada cliente dentro del ecosistema.",
-  //   highlights: [
-  //     {
-  //       title: "Propiedades y obras",
-  //       description:
-  //         "Cobertura para los activos físicos gestionados dentro del ecosistema.",
-  //     },
-  //     {
-  //       title: "Inversiones",
-  //       description:
-  //         "Protección estratégica de los activos financieros que construye NODO.",
-  //     },
-  //     {
-  //       title: "Cobertura a medida",
-  //       description:
-  //         "Pensada en función de la operación real de cada cliente, no genérica.",
-  //     },
-  //   ],
-  // },
+  {
+    code: "Salud",
+    slug: "salud",
+    label: "Nodo Salud",
+    description:
+      "Inteligencia médica colaborativa: descentralización de historias clínicas y gestión digital para especialistas.",
+    Icon: Stethoscope,
+    intro:
+      "NODO | Salud es el entorno digital donde la medicina se descentraliza para ser más eficiente. Funciona como un nodo integrador de profesionales de distintas ramas, permitiendo la gestión inteligente de historias clínicas, la interconsulta interdisciplinaria y la trazabilidad de datos de pacientes en un entorno privado, seguro y estandarizado. Más que una plataforma de gestión, es el punto de encuentro donde el conocimiento clínico se conecta con la tecnología para reducir la fragmentación asistencial. Actualmente en fase de desarrollo, integrando los protocolos de seguridad más avanzados del mercado para asegurar que cada byte de información médica esté protegido bajo nuestra arquitectura NODO.",
+    highlights: [
+      {
+        title: "Interoperabilidad Médica",
+        description:
+          "Unificamos datos para que el historial del paciente fluya entre especialistas bajo estrictos estándares de seguridad y confidencialidad.",
+      },
+      {
+        title: "Ecosistema Colaborativo",
+        description:
+          "Facilitamos la conformación de juntas médicas digitales y la transferencia de conocimiento técnico entre distintas especialidades.",
+      },
+      {
+        title: "Seguridad por Diseño",
+        description:
+          "Garantizamos control total sobre la privacidad y el acceso a la información médica bajo nuestra arquitectura NODO.",
+      },
+    ],
+  },
   {
     code: "Agro",
     slug: "agro",
