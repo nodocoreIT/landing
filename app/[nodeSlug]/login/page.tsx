@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import EcosystemDiagram from "@/components/EcosystemDiagram";
@@ -14,10 +14,26 @@ import {
   submitInmoRegistration,
 } from "@/app/actions";
 
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-navy-900 text-white flex items-center justify-center font-semibold">
+          Cargando...
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
+  );
+}
+
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nodeParam = searchParams.get("node") || "";
+  const params = useParams();
+  const nodeSlug = params?.nodeSlug as string;
+  const nodeParam = nodeSlug || "";
   const modeParam = searchParams.get("mode") || "login";
   const roleParam = searchParams.get("role") || "paciente";
 
@@ -61,7 +77,14 @@ function LoginForm() {
     message: "",
   });
 
-  const matchedNode = getNodeBySlug(nodeParam);
+  const cleanSlug =
+    nodeParam === "nodo-clinica" || nodeParam === "clinica-virtual"
+      ? "salud"
+      : nodeParam.startsWith("nodo-")
+        ? nodeParam.slice(5)
+        : nodeParam;
+
+  const matchedNode = getNodeBySlug(cleanSlug);
 
   // Set up details for the left panel based on nodeParam
   let activeNodeSlug: string | undefined = undefined;
@@ -69,7 +92,7 @@ function LoginForm() {
   let panelDesc =
     "Panel de administración para gestionar clientes, unidades de negocio y el roadmap del Core.";
 
-  if (nodeParam === "clinica-virtual") {
+  if (nodeParam === "nodo-clinica" || nodeParam === "clinica-virtual") {
     activeNodeSlug = "salud"; // Connect to Salud in diagram
     panelTitle = "NODO | Clínica Virtual";
     panelDesc =
@@ -112,7 +135,7 @@ function LoginForm() {
 
     if (authMode === "login") {
       const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
@@ -124,14 +147,30 @@ function LoginForm() {
         setLoading(false);
         return;
       }
-      router.push("/panel");
+      if (nodeParam === "nodo-inmo" || nodeParam === "inmo") {
+        window.location.href = "https://nodoinmo.vercel.app";
+      } else if (
+        nodeParam === "nodo-clinica" ||
+        nodeParam === "clinica-virtual"
+      ) {
+        const role = data.user?.app_metadata?.role;
+        if (role === "medico") {
+          window.location.href = "/medico";
+        } else if (role === "admin") {
+          window.location.href = "/admin";
+        } else {
+          window.location.href = "/paciente";
+        }
+      } else {
+        router.push("/panel");
+      }
     } else {
       const originUrl =
         typeof window !== "undefined"
           ? window.location.origin
           : "http://localhost:3000";
 
-      if (nodeParam === "inmo") {
+      if (nodeParam === "nodo-inmo" || nodeParam === "inmo") {
         const result = await submitInmoRegistration(
           fullName,
           email,
@@ -304,7 +343,7 @@ function LoginForm() {
       {/* Back button */}
       <Link
         href={
-          nodeParam === "clinica-virtual"
+          nodeParam === "nodo-clinica" || nodeParam === "clinica-virtual"
             ? "/nodo-salud/clinica-virtual"
             : matchedNode
               ? `/nodo-${matchedNode.slug}`
@@ -329,7 +368,7 @@ function LoginForm() {
 
           <div className="relative z-[1]">
             <Image
-              src="/nodo-logo-white.png"
+              src="/logos/logo compuesto estrella az letra blancazzz.png"
               alt="Nodo Core"
               height={30}
               width={140}
@@ -340,6 +379,8 @@ function LoginForm() {
           <div className="relative z-[1]">
             <EcosystemDiagram
               dark
+              interactive
+              isLoginPage
               activeNodeSlug={activeNodeSlug}
               className="w-[min(420px,65%)] aspect-square mx-auto my-3"
             />
@@ -349,11 +390,21 @@ function LoginForm() {
               style={{ fontSize: "clamp(26px,2.6vw,34px)", lineHeight: 1.15 }}
             >
               {panelTitle.includes("|") ? (
-                <>
-                  <span className="text-brand">NODO</span>
-                  <span className="text-white/40 font-normal mx-2">|</span>
-                  {panelTitle.split("|")[1].trim()}
-                </>
+                <span className="flex items-center gap-[0.3em]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/logos/nodo nar.png"
+                    alt="NODO"
+                    style={{
+                      height: "0.82em",
+                      width: "auto",
+                      display: "inline-block",
+                      verticalAlign: "middle",
+                    }}
+                  />
+                  <span className="text-white/40 font-normal mx-1">|</span>
+                  <span>{panelTitle.split("|")[1].trim()}</span>
+                </span>
               ) : (
                 panelTitle
               )}
@@ -379,7 +430,10 @@ function LoginForm() {
         <main className="flex items-center justify-center p-8 bg-paper min-h-screen">
           <div className="w-[min(420px,100%)]">
             {/* If node is Clinica Virtual or Inmo, show Iniciar / Registrar toggle */}
-            {(nodeParam === "clinica-virtual" || nodeParam === "inmo") &&
+            {(nodeParam === "nodo-clinica" ||
+              nodeParam === "clinica-virtual" ||
+              nodeParam === "nodo-inmo" ||
+              nodeParam === "inmo") &&
               (authMode === "login" || authMode === "register") && (
                 <div className="flex border-b border-mist mb-6">
                   <button
@@ -415,9 +469,10 @@ function LoginForm() {
               <div>
                 {/* Kicker */}
                 <span className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[.14em] text-brand">
-                  {nodeParam === "clinica-virtual"
+                  {nodeParam === "nodo-clinica" ||
+                  nodeParam === "clinica-virtual"
                     ? "◎ Portal Clínica Virtual"
-                    : nodeParam === "inmo"
+                    : nodeParam === "nodo-inmo" || nodeParam === "inmo"
                       ? "◎ Portal Inmobiliarias"
                       : "◎ Acceso administradores"}
                 </span>
@@ -426,14 +481,16 @@ function LoginForm() {
                   Iniciar sesión
                 </h1>
                 <p className="text-slate2 text-[14.5px] mb-6">
-                  {nodeParam === "clinica-virtual"
+                  {nodeParam === "nodo-clinica" ||
+                  nodeParam === "clinica-virtual"
                     ? "Ingrese sus credenciales de profesional o paciente para acceder."
-                    : nodeParam === "inmo"
+                    : nodeParam === "nodo-inmo" || nodeParam === "inmo"
                       ? "Ingrese sus credenciales de dueño de inmobiliaria para acceder."
                       : "Ingrese sus credenciales para acceder al panel de Nodo Core."}
                 </p>
 
-                {nodeParam === "clinica-virtual" && (
+                {(nodeParam === "nodo-clinica" ||
+                  nodeParam === "clinica-virtual") && (
                   <>
                     {/* Google Login for Patients */}
                     <button
@@ -1342,19 +1399,5 @@ function LoginForm() {
         </div>
       )}
     </>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-navy-900 text-white flex items-center justify-center font-semibold">
-          Cargando...
-        </div>
-      }
-    >
-      <LoginForm />
-    </Suspense>
   );
 }

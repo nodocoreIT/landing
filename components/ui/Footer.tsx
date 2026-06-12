@@ -84,10 +84,10 @@ export default function Footer() {
           {/* Col 1: Brand */}
           <div>
             <Image
-              src="/nodo-logo-white.png"
+              src="/logos/nodo bco.png"
               alt="Nodo Core"
               height={26}
-              width={120}
+              width={78}
               className="h-[26px] w-auto mb-5"
             />
             <p

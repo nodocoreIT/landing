@@ -291,8 +291,9 @@ function Satellite({
   let tooltipDesc = node.description;
 
   if (isLoginPage) {
-    // On login page, switch portals
-    href = `/login?node=${node.slug === "salud" ? "clinica-virtual" : node.slug}`;
+    // On login page, switch portals using new dynamic routing
+    const loginSlug = node.slug === "salud" ? "nodo-clinica" : `nodo-${node.slug}`;
+    href = `/${loginSlug}/login`;
     tooltipDesc = `Ir a ${node.label.toLowerCase()}`;
   }
 

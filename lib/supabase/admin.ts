@@ -7,13 +7,12 @@ import { createClient } from "@supabase/supabase-js";
 // server (Route Handlers, Server Actions, server-only modules). The key lives in
 // SUPABASE_SERVICE_ROLE_KEY (no NEXT_PUBLIC_ prefix, so it is never sent to the
 // browser).
-export function createAdminClient() {
+export function createAdminClient(schema: string = "nodo_core") {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     {
-      // All app tables now live in the nodo_core schema (see schema migration).
-      db: { schema: "nodo_core" },
+      db: { schema },
       auth: {
         autoRefreshToken: false,
         persistSession: false,

@@ -85,7 +85,7 @@ export default function ClinicaVirtualPage() {
 
               <div className="flex flex-wrap gap-4 mt-8">
                 <Link
-                  href="/login?node=clinica-virtual"
+                  href="/nodo-clinica/login"
                   className="inline-flex items-center justify-center px-6 py-3 text-sm font-bold rounded-lg bg-brand text-white hover:bg-brand-600 active:scale-[.98] transition-all duration-150 shadow-lg shadow-brand/20"
                 >
                   Entrar a Clínica Virtual

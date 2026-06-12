@@ -98,10 +98,10 @@ export default function Sidebar({
         <div style={{ padding: "24px 20px 20px" }}>
           <Link href="/panel" style={{ display: "inline-block" }}>
             <Image
-              src="/nodo-logo-white.png"
+              src="/logos/nodo bco.png"
               alt="Nodo Core"
               height={24}
-              width={110}
+              width={72}
               className="h-[24px] w-auto"
             />
           </Link>
